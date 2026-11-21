@@ -124,7 +124,9 @@
     .wrap { padding: 0 16px; }
     .links a:not(.btn) { display: none; }
     h1 { margin-top: 40px; }
-    #mtn { height: 52%; }
+    /* phones: fixed-height range that always starts below the (taller) text, never behind the buttons */
+    .hero { padding-bottom: 320px; }
+    #mtn { height: 340px; }
     .set { gap: 56px; padding-right: 56px; }
     .block { padding: 80px 0; }
     .step { min-height: 300px; padding: 24px; margin-bottom: 80px; top: calc(80px + var(--i) * 16px); }
@@ -342,6 +344,10 @@
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const W = box.clientWidth, H = box.clientHeight;
     const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
+    // Narrow screens see a crop of the desktop-shaped scene (like a cover photo) instead of
+    // squeezing every peak into a spike: lay it out on a virtual width, then show a window around the summit.
+    const VW = Math.max(W, H * 2), offX = Math.min(VW - W, Math.max(0, .6 * VW - W / 2));
+    const vcols = Math.ceil(VW / cell), c0 = Math.round(offX / cell);
 
     LAYERS.forEach((L, i) => {
       const cv = cvs[i], ctx = cv.getContext('2d');
@@ -350,22 +356,22 @@
 
       const ys = new Float32Array(cols + 1), sh = new Float32Array(cols + 1);
       for (let c = 0; c <= cols; c++) {
-        const u = c / cols;
+        const vc = c + c0, u = vc / vcols;
         sh[c] = 1 - L.lit / (1 + Math.exp((u - L.pu) * 60)); // sunlit left face pale, soft blend at the summit
         const tent = Math.max(0, 1 - (u < L.pu ? (L.pu - u) / L.wl : (u - L.pu) / L.wr)) ** (L.pow || 1); // pow > 1: concave sides, needle tip
-        const p = c * cell / Math.max(H, 420) * 2.4; // noise in height units, so narrow screens don't squash it
+        const p = vc * cell / Math.max(H, 420) * 2.4; // noise in height units, so narrow screens don't squash it
         ys[c] = (L.foot - L.ph * tent - L.jag * (fbm(p + L.off) - .5) * (.4 + tent)) * rows;
       }
 
       const paths = PAL.map(() => new Path2D()); // batch dots by colour: one fill per colour instead of one per dot
       for (let c = 0; c < cols; c++) {
-        const u = c / cols, fadeIn = Math.min(1.2, .58 + u * .75); // paler grey on the left, extra blue toward the right
+        const vc = c + c0, u = vc / vcols, fadeIn = Math.min(1.2, .58 + u * .75); // paler grey on the left, extra blue toward the right
         for (let r = Math.max(0, Math.ceil(ys[c])); r < rows; r++) {
           const d = r - ys[c];
           const depth = Math.min(1, d / (rows * .18)); // short fade: each range reads as its own layer
           let v = Math.max(.14, L.tone * sh[c] * (1 - L.mist * depth)); // crest strongest, mist below; floor keeps snow visible
           // rock strata that follow the ridgeline (d = cells below the crest) + fine speckle
-          const tex = .55 * noise2(c / 20, d / 2.5) + .45 * noise2(c / 4 + 50, d / 4) - .5;
+          const tex = .55 * noise2(vc / 20, d / 2.5) + .45 * noise2(vc / 4 + 50, d / 4) - .5;
           v = Math.max(0, Math.min(1, (v + tex * .42 * (.3 + L.tone)) * fadeIn));
           const x = v * (PAL.length - 1), lo = Math.floor(x);
           // half ordered, half random threshold: grainy halftone instead of a clean checker grid
