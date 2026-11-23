@@ -46,7 +46,7 @@
   .lede { max-width: 400px; margin-top: 32px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
-  /* dithered kenduri scene (canopy tents + buffet table), drawn on canvas */
+  /* dithered kenduri scene (bunga manggar, ketupat, feast table), drawn on canvas */
   #mtn { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 68%; z-index: 0; display: block; }
   /* one canvas per ridge, moved separately on scroll for parallax */
   #mtn canvas { position: absolute; inset: 0; width: 100%; height: 100%; will-change: transform; }
@@ -341,77 +341,114 @@
   // ridged noise (1-|n|) gives a jagged, rocky ridgeline
   const fbm = x => { let s = 0, a = .55, fr = 1; for (let o = 0; o < 5; o++) { s += a * (1 - Math.abs(2 * noise(x * fr + o * 31) - 1)); a *= .48; fr *= 2.2; } return s; };
 
-  // Kenduri scene: rows of canopy tents (khemah) receding into the distance, then the buffet table in front.
-  // Sizes are in canvas-height units, so phones keep the same shapes. eave/roof/val: fractions of the height.
-  const TENTS = [ // from: rows start partway across, so the left (behind the text) stays open
-    { eave: .44, tw: .36, roof: .13, val: .035, tone: .34, phase: .10, from: .48 }, // far row, small and misty
-    { eave: .60, tw: .52, roof: .17, val: .045, tone: .52, phase: .62, from: .30 },
-    { eave: .76, tw: .80, roof: .22, val: .055, tone: .72, phase: .30, from: .12 }  // nearest row
-  ];
-  const TABLE = { top: .88, tone: .95, sp: .26, rd: .085, band: .03 };  // tudung saji domes on a dressed table
-  const LAYERS = [...TENTS, TABLE];
-  const cvs = LAYERS.map(() => box.appendChild(document.createElement('canvas')));
+  // Kenduri scene, back to front: bunga manggar sprays (animated like fireworks), hanging ketupat, the feast table.
+  // Units are canvas heights (Y 0 top .. 1 bottom); xR is the right edge, so the scene hugs the right and leaves the text side open.
   const cell = 3;
   const frac = x => x - Math.floor(x);
-  const hang = f => .45 + .55 * Math.sqrt(Math.max(0, 1 - (2 * f - 1) ** 2)); // one scallop of a valance edge
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const hang = f => .45 + .55 * Math.sqrt(Math.max(0, 1 - (2 * f - 1) ** 2)); // one scallop of a cloth edge
+  const inEll = (X, Y, cx, cy, rx, ry) => ((X - cx) / rx) ** 2 + ((Y - cy) / ry) ** 2 <= 1;
+  const segDist = (X, Y, ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, t = clamp(((X - ax) * dx + (Y - ay) * dy) / (dx * dx + dy * dy)); return Math.hypot(X - ax - t * dx, Y - ay - t * dy); };
+  const twinkle = (c, r, f) => { let h = Math.imul(c, 73856093) ^ Math.imul(r, 19349663) ^ Math.imul(f, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
-  // one column of a tent row: where it starts, and the shade of each cell below that
-  function tentCol(L, x, H, rows, vw) {
-    const tw = L.tw * H, t = frac(x / tw + L.phase);
-    if ((x / tw + L.phase - t) * tw - L.phase * tw < L.from * vw) return { top: rows, at: () => 0 }; // whole tents only
-    const n = Math.max(3, Math.round(tw / (cell * 10))); // scallops at least ~10 cells wide, or they alias
-    const top = (L.eave - L.roof * (1 - Math.abs(2 * t - 1)) ** 1.5) * rows; // concave sides, peaked top
-    const eave = L.eave * rows, valB = (L.eave + L.val * hang(frac(t * n))) * rows;
-    const pole = Math.min(t, 1 - t) * tw < cell * 1.6;
-    return { top, at: r =>
-      r < eave ? L.tone * (t < .5 ? .5 : .78)        // canopy roof: sunlit left half, shaded right half
-      : r < valB ? L.tone * 1.12                       // scalloped valance band
-      : pole ? L.tone * .3                             // pale tent pole
-      : L.tone * (.8 - .5 * Math.min(1, (r - valB) / (rows * .14))) }; // soft shade under the canopy, misting toward the ground
+  // [distance from right edge, top Y, radius]
+  const SPRAYS = [[1.15, .36, .13], [.95, .22, .16], [.72, .13, .18], [.5, .24, .16], [.28, .38, .13]];
+  function manggar(X, Y, xR, t, c, r) {
+    for (let i = 0; i < SPRAYS.length; i++) {
+      const [off, top, R] = SPRAYS[i], x = xR - off;
+      // each spray bursts open (fast ease-out), sparkles, dims a little, then bursts again; staggered per spray
+      const p = frac(t / 3.2 + i * .21), grow = .3 + .7 * (1 - (1 - clamp(p / .3)) ** 3), glow = p < .6 ? 1 : 1 - .45 * (p - .6) / .4;
+      const Rg = R * grow, dx = X - x, dy = Y - top - .3 * dx * dx / R, d = Math.hypot(dx, dy); // strands droop toward their tips
+      if (d < Rg && d > .012) {
+        const k = frac(Math.atan2(dy, dx) / (2 * Math.PI) * 24 + d * 3);
+        if (k < .17) return d > Rg * .8 ? (twinkle(c, r, Math.floor(t * 10)) > .45 ? .95 : .5) * glow : (.45 + .4 * d / R) * glow;
+      }
+      if (d <= .016) return .95;
+      if (Math.abs(dx) < .007 && Y > top && Y < .75) return .78; // pole
+    }
+    return -1;
   }
 
-  function tableCol(x, H, rows) {
-    const sp = TABLE.sp * H, rd = TABLE.rd * H, dx = frac(x / sp + .5) * sp - sp / 2; // distance to the nearest dome centre
-    const tableR = TABLE.top * rows, dome = Math.abs(dx) < rd;
-    let top = dome ? (TABLE.top - TABLE.rd * .85 * Math.sqrt(1 - (dx / rd) ** 2)) * rows : tableR;
-    if (Math.abs(dx) < cell * 1.5) top -= 2.5; // little knob on each tudung saji
-    const bandB = (TABLE.top + TABLE.band * hang(frac(x / (sp / 4)))) * rows;
-    return { top, at: r => r < tableR ? TABLE.tone * (dx < 0 ? .62 : 1) : r < bandB ? TABLE.tone : .18 };
+  const KETUPAT = [[1.52, .32, .075], [1.36, .48, .095], [1.2, .27, .07]]; // [distance from right edge, centre Y, half-size]
+  function ketupat(X, Y, xR) {
+    for (const [off, cy, sz] of KETUPAT) {
+      const dx = X - (xR - off), dy = Y - cy;
+      if (Math.abs(dx) / sz + Math.abs(dy) / sz <= 1) { // woven diamond
+        const check = ((Math.floor((dx + dy) * 34) + Math.floor((dx - dy) * 34)) & 1) === 1;
+        return (check ? .5 : .85) - (dx < 0 ? .15 : 0);
+      }
+      if (Math.abs(dx) < .004 && Y < cy - sz && Y > cy - sz - .2) return .55; // short string, kept clear of the headline
+      if (Y > cy + sz && Y < cy + sz + .09) for (const k of [-1, 1]) if (Math.abs(dx - k * (Y - cy - sz) * .35) < .006) return .75; // tails
+    }
+    return -1;
+  }
+
+  function feast(X, Y, xR) {
+    const top = .72;
+    if (Y >= top && X > xR - 1.45) return Y < top + .045 * hang(frac(X * 8)) ? .95 : .13;          // scalloped table cloth
+    const rice = xR - 1.15, bowl = xR - .8, pot = xR - .53;
+    if (Y >= top - .035 && Y < top && Math.abs(X - rice) < .24) return .8;                         // dulang
+    if (Y < top - .035 && inEll(X, Y, rice, top - .035, .2, .18)) return .18 + .3 * clamp((X - rice + .2) / .4); // nasi minyak dome
+    if (Y < top && Y > top - .12 && inEll(X, Y, bowl, top - .12, .12, .12)) return Y < top - .1 ? .7 : .9; // bowl of curry
+    if (inEll(X, Y, pot, top - .1, .09, .1)) return X < pot ? .55 : .85;                            // teapot
+    if (segDist(X, Y, pot + .08, top - .11, pot + .17, top - .19) < .014) return .85;                // spout
+    if (inEll(X, Y, pot, top - .215, .025, .022)) return .9;                                        // lid knob
+    const hd = Math.hypot(X - (pot - .1), Y - (top - .1));
+    if (hd > .035 && hd < .05 && X < pot - .08) return .85;                                         // handle
+    if (X > xR - .32 && X < xR - .16 && Y < top && Y > top - .12) return frac((top - Y) / .02) < .55 ? .9 : .3; // stacked plates
+    if (X > xR - .11 && X < xR - .02 && Y < top && Y > top - .25) return Y > top - .15 ? .85 : .25;  // sirap jug
+    return -1;
+  }
+
+  const SCENE = [manggar, ketupat, feast]; // back to front; parallax speeds follow this order
+  const cvs = SCENE.map(() => box.appendChild(document.createElement('canvas')));
+  let G = null; // sizes for the current layout
+
+  function paint(i, t) {
+    const { W, H, cols, rows, c0, vcols, xR, dpr } = G, ctx = cvs[i].getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const paths = PAL.map(() => new Path2D()); // batch dots by colour: one fill per colour instead of one per dot
+    for (let c = 0; c < cols; c++) {
+      const vc = c + c0, X = vc * cell / H, fadeIn = Math.min(1.15, .7 + vc / vcols * .5); // greyer left, bluer right
+      for (let r = 0; r < rows; r++) {
+        // desktop: scene drawn at 80% size, anchored bottom-right so it stays clear of the headline; phones: full size
+        let v = SCENE[i](xR - (xR - X) / G.scale, 1 - (1 - r * cell / H) / G.scale, xR, t, c, r);
+        if (v < 0) continue;
+        const tex = .55 * noise2(vc / 20, r / 2.5) + .45 * noise2(vc / 4 + 50, r / 4) - .5; // grain speckle
+        v = clamp((v + tex * .14) * fadeIn);
+        const x = v * (PAL.length - 1), lo = Math.floor(x);
+        // half ordered, half random threshold: grainy halftone instead of a clean checker grid
+        let h = Math.imul(c, 374761393) + Math.imul(r, 668265263) | 0;
+        h = Math.imul(h ^ (h >>> 13), 1274126177);
+        const thr = .5 * BAYER[(r & 3) * 4 + (c & 3)] + .5 * (((h ^ (h >>> 16)) >>> 0) / 4294967296);
+        paths[Math.min(PAL.length - 1, lo + ((x - lo) > thr ? 1 : 0))].rect(c * cell, r * cell, cell - 1, cell - 1);
+      }
+    }
+    // ivory dots still get painted on front layers so they hide the layers behind them
+    paths.forEach((path, k) => { if (k || i) { ctx.fillStyle = PAL[k]; ctx.fill(path); } });
   }
 
   function draw() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const W = box.clientWidth, H = box.clientHeight;
-    const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
     // Narrow screens see a crop of the desktop-shaped scene (like a cover photo) instead of a squeezed one.
-    const VW = Math.max(W, H * 2), offX = Math.min(VW - W, Math.max(0, .6 * VW - W / 2));
-    const vcols = Math.ceil(VW / cell), c0 = Math.round(offX / cell);
-
-    LAYERS.forEach((L, i) => {
-      const cv = cvs[i], ctx = cv.getContext('2d');
-      cv.width = W * dpr; cv.height = H * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const paths = PAL.map(() => new Path2D()); // batch dots by colour: one fill per colour instead of one per dot
-
-      for (let c = 0; c < cols; c++) {
-        const vc = c + c0, u = vc / vcols, fadeIn = Math.min(1.15, .7 + u * .5); // greyer on the left, bluer on the right
-        const col = L === TABLE ? tableCol(vc * cell, H, rows) : tentCol(L, vc * cell, H, rows, VW);
-        for (let r = Math.max(0, Math.ceil(col.top)); r < rows; r++) {
-          const d = r - col.top;
-          const tex = .55 * noise2(vc / 20, d / 2.5) + .45 * noise2(vc / 4 + 50, d / 4) - .5; // fabric/grain speckle
-          const v = Math.max(0, Math.min(1, (col.at(r) + tex * .22 * (.3 + L.tone)) * fadeIn));
-          const x = v * (PAL.length - 1), lo = Math.floor(x);
-          // half ordered, half random threshold: grainy halftone instead of a clean checker grid
-          let h = Math.imul(c, 374761393) + Math.imul(r, 668265263) | 0;
-          h = Math.imul(h ^ (h >>> 13), 1274126177);
-          const thr = .5 * BAYER[(r & 3) * 4 + (c & 3)] + .5 * (((h ^ (h >>> 16)) >>> 0) / 4294967296);
-          paths[Math.min(PAL.length - 1, lo + ((x - lo) > thr ? 1 : 0))].rect(c * cell, r * cell, cell - 1, cell - 1);
-        }
-      }
-      // ivory dots still get painted on front layers so they hide the layers behind them
-      paths.forEach((path, k) => { if (k || i) { ctx.fillStyle = PAL[k]; ctx.fill(path); } });
-    });
+    const phone = W < 760, VW = Math.max(W, H * 2);
+    const offX = phone ? VW - W : Math.min(VW - W, Math.max(0, .68 * VW - W / 2)); // phones show the right end: sprays + table
+    G = { scale: phone ? 1 : .8, W, H, dpr, cols: Math.ceil(W / cell), rows: Math.ceil(H / cell), vcols: Math.ceil(VW / cell), c0: Math.round(offX / cell), xR: VW / H };
+    cvs.forEach(cv => { cv.width = W * dpr; cv.height = H * dpr; });
+    SCENE.forEach((_, i) => paint(i, 1)); // t = 1: sprays fully open (also the still frame for reduced motion)
     parallax();
+  }
+
+  // fireworks: repaint only the manggar layer, ~30 fps, only while the hero is on screen
+  let last = 0;
+  const t0 = performance.now();
+  function tick(now) {
+    requestAnimationFrame(tick);
+    if (!G || still.matches || now - last < 33 || scrollY > hero.offsetHeight) return;
+    last = now;
+    paint(0, 1 + (now - t0) / 1000);
   }
 
   // parallax: far ranges lag behind the scroll, the front slope moves with the page
@@ -428,6 +465,7 @@
 
   let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 120); });
   draw();
+  requestAnimationFrame(tick);
 })();
 </script>
 <script>
