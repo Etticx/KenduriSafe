@@ -46,10 +46,11 @@
   .lede { max-width: 400px; margin-top: 32px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
-  /* dithered kenduri scene (fireworks, ketupat garland, feast table), drawn on canvas */
+  /* dithered kenduri scene (fireworks, feast table, one ketupat), drawn on canvas */
   #mtn { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 68%; z-index: 0; display: block; }
   /* one canvas per ridge, moved separately on scroll for parallax */
   #mtn canvas { position: absolute; inset: 0; width: 100%; height: 100%; will-change: transform; }
+  #ket { position: absolute; z-index: 0; pointer-events: none; }
 
   /* line-by-line reveal: each headline line rises out of its own mask, then the text and buttons fade up */
   h1 .line { display: block; overflow: hidden; padding-bottom: .2em; margin-bottom: -.2em; }
@@ -341,7 +342,7 @@
   // ridged noise (1-|n|) gives a jagged, rocky ridgeline
   const fbm = x => { let s = 0, a = .55, fr = 1; for (let o = 0; o < 5; o++) { s += a * (1 - Math.abs(2 * noise(x * fr + o * 31) - 1)); a *= .48; fr *= 2.2; } return s; };
 
-  // Kenduri scene, back to front: fireworks (animated), a ketupat garland, the feast table.
+  // Kenduri scene, back to front: fireworks (animated), the feast table; plus one hanging ketupat.
   // Units are canvas heights (Y 0 top .. 1 bottom); xR is the right edge, so the scene hugs the right and leaves the text side open.
   const cell = 3;
   const frac = x => x - Math.floor(x);
@@ -351,13 +352,15 @@
   const segDist = (X, Y, ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, t = clamp(((X - ax) * dx + (Y - ay) * dy) / (dx * dx + dy * dy)); return Math.hypot(X - ax - t * dx, Y - ay - t * dy); };
   const twinkle = (c, r, f) => { let h = Math.imul(c, 73856093) ^ Math.imul(r, 19349663) ^ Math.imul(f, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
-  // [distance from right edge, burst height Y, burst radius]
-  const FIREWORKS = [[1.6, .1, .12], [1.05, .16, .16], [.8, .3, .13], [.55, .1, .18], [.3, .26, .14]];
-  function fireworks(X, Y, xR, t, c, r) {
-    for (let i = 0; i < FIREWORKS.length; i++) {
-      const [off, apex, R] = FIREWORKS[i], x = xR - off, p = frac(t / 3.4 + i * .23);
+  // Fireworks are laid out per screen in layout(): spread along the whole table, and under the text column
+  // they burst below the buttons. They use raw canvas units (X, Y), not the scaled scene.
+  function fireworks(Xs, Ys, xR, t, c, r, X, Y) {
+    const table = 1 - (1 - .72) * G.scale;
+    for (const [x, apex, R, ph] of G.fw) {
+      if (Math.abs(X - x) > R + .03) continue;
+      const p = frac(t / 3.4 + ph);
       if (p < .28) { // rocket: shoots up from behind the table, slowing near the top, short fading trail
-        const e = 1 - (1 - p / .28) ** 2, ry = .72 - (.72 - apex) * e;
+        const e = 1 - (1 - p / .28) ** 2, ry = table - (table - apex) * e;
         if (Math.abs(X - x) < .009 && Math.abs(Y - ry) < .01) return .95;
         if (Math.abs(X - x) < .005 && Y > ry && Y < ry + .09) return .2 + .6 * (1 - (Y - ry) / .09);
         continue;
@@ -372,25 +375,6 @@
           if (v > .08) return v;
         }
       }
-    }
-    return -1;
-  }
-
-  // a sagging garland of ketupat across the open lower-left, at scene units from the right edge
-  const GARLAND = { from: 2.35, to: 1.25, y0: .2, y1: .16, sag: .08 };
-  const garlandY = X => { const s = (X - GARLAND.ax) / (GARLAND.bx - GARLAND.ax); return GARLAND.y0 + (GARLAND.y1 - GARLAND.y0) * s + GARLAND.sag * 4 * s * (1 - s); };
-  function ketupat(X, Y, xR) {
-    GARLAND.ax = xR - GARLAND.from; GARLAND.bx = xR - GARLAND.to;
-    if (X < GARLAND.ax || X > GARLAND.bx) return -1;
-    if (Math.abs(Y - garlandY(X)) < .005) return .6; // the string
-    for (const [s, sz] of [[.14, .06], [.38, .075], [.62, .065], [.86, .075]]) {
-      const xk = GARLAND.ax + (GARLAND.bx - GARLAND.ax) * s, yk = garlandY(xk), cy = yk + .03 + sz, dx = X - xk, dy = Y - cy;
-      if (Math.abs(dx) / sz + Math.abs(dy) / sz <= 1) { // woven diamond
-        const check = ((Math.floor((dx + dy) * 34) + Math.floor((dx - dy) * 34)) & 1) === 1;
-        return (check ? .5 : .85) - (dx < 0 ? .15 : 0);
-      }
-      if (Math.abs(dx) < .004 && Y > yk && Y < cy - sz) return .6; // drop
-      if (Y > cy + sz && Y < cy + sz + .07) for (const k of [-1, 1]) if (Math.abs(dx - k * (Y - cy - sz) * .35) < .006) return .75; // tails
     }
     return -1;
   }
@@ -438,7 +422,7 @@
     return -1;
   }
 
-  const SCENE = [fireworks, ketupat, feast]; // back to front; parallax speeds follow this order
+  const SCENE = [fireworks, feast]; // back to front; parallax speeds follow this order
   const cvs = SCENE.map(() => box.appendChild(document.createElement('canvas')));
   let G = null; // sizes for the current layout
 
@@ -451,7 +435,7 @@
       const vc = c + c0, X = vc * cell / H, fadeIn = Math.min(1.15, .7 + vc / vcols * .5); // greyer left, bluer right
       for (let r = 0; r < rows; r++) {
         // desktop: scene drawn at 80% size, anchored bottom-right so it stays clear of the headline; phones: full size
-        let v = SCENE[i](xR - (xR - X) / G.scale, 1 - (1 - r * cell / H) / G.scale, xR, t, c, r);
+        let v = SCENE[i](xR - (xR - X) / G.scale, 1 - (1 - r * cell / H) / G.scale, xR, t, c, r, X, r * cell / H);
         if (v < 0) continue;
         const tex = .55 * noise2(vc / 20, r / 2.5) + .45 * noise2(vc / 4 + 50, r / 4) - .5; // grain speckle
         v = clamp((v + tex * .14) * fadeIn);
@@ -467,6 +451,61 @@
     paths.forEach((path, k) => { if (k || i) { ctx.fillStyle = PAL[k]; ctx.fill(path); } });
   }
 
+  // One hanging ketupat on its own small canvas, so its string can start at the menu line above the scene.
+  const ket = hero.appendChild(document.createElement('canvas'));
+  ket.id = 'ket'; ket.setAttribute('aria-hidden', 'true');
+
+  // Measure where the text sits so the ketupat and fireworks keep clear of it.
+  function layout() {
+    const { W, H, c0 } = G, hb = hero.getBoundingClientRect(), b = box.getBoundingClientRect();
+    const h1 = hero.querySelector('h1').getBoundingClientRect(), nav = hero.querySelector('nav').getBoundingClientRect();
+    const ctas = hero.querySelector('.ctas').getBoundingClientRect(), lede = hero.querySelector('.lede').getBoundingClientRect();
+    const textL = h1.left - hb.left, textR = Math.max(ctas.right, lede.right) - b.left;
+    const below = (ctas.bottom - b.top) / H + .05;               // first canvas row clear of the buttons
+    const table = 1 - (1 - .72) * G.scale;
+    // ketupat: in the empty margin left of the headline when there is room, otherwise just under the buttons
+    const wide = textL > 160, sz = 34, kw = 90;
+    const kx = wide ? textL / 2 : textL + 70;
+    const ktop = wide ? nav.bottom - hb.top : ctas.bottom - hb.top + 18;
+    const len = wide ? h1.top - nav.bottom + h1.height * .35 : 30;
+    drawKetupat(kx - kw / 2, ktop, kw, len, sz);
+    // fireworks: one about every .42 heights along the visible table, deterministic per slot
+    const x0 = c0 * cell / H, x1 = (c0 * cell + W) / H, n = Math.max(2, Math.round((x1 - x0) / .42));
+    const kX = x0 + kx / H, kBottom = (ktop + len + 2 * sz + 30 - (b.top - hb.top)) / H;
+    G.fw = [];
+    for (let i = 0; i < n; i++) {
+      const x = x0 + (i + .5) * (x1 - x0) / n + (N[i * 7 & 511] - .5) * .12;
+      let R = .1 + .06 * N[i * 13 & 511], apex = .1 + .22 * N[i * 29 & 511];
+      if ((x - x0) * H < textR + R * H) {                      // under the text column: burst below the buttons
+        R = Math.min(R, (table - .1 - below) / 2);
+        apex = Math.max(apex, below + R);
+      }
+      if (Math.abs(x - kX) < R + .1 && apex - R < kBottom) continue; // keep clear of the ketupat
+      if (R >= .05 && apex + R < table - .02) G.fw.push([x, apex, R, N[i * 31 & 511]]);
+    }
+  }
+
+  function drawKetupat(left, top, w, len, sz) {
+    const dpr = G.dpr, h = len + 2 * sz + 34;
+    Object.assign(ket.style, { left: left + 'px', top: top + 'px', width: w + 'px', height: h + 'px' });
+    ket.width = w * dpr; ket.height = h * dpr;
+    const ctx = ket.getContext('2d'), paths = PAL.map(() => new Path2D()), cx = w / 2, cy = len + sz;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    for (let y = 0; y < h; y += cell) for (let x = 0; x < w; x += cell) {
+      const dx = x - cx, dy = y - cy, tail = y - cy - sz;
+      let v = -1;
+      if (Math.abs(dx) / sz + Math.abs(dy) / sz <= 1) v = ((Math.floor((dx + dy) / 6) + Math.floor((dx - dy) / 6)) & 1 ? .5 : .85) - (dx < 0 ? .15 : 0); // woven diamond
+      else if (Math.abs(dx) < 2 && y < cy - sz) v = .6;                                     // string
+      else if (tail > 0 && tail < 30 && (Math.abs(dx + tail * .35) < 2 || Math.abs(dx - tail * .35) < 2)) v = .75; // tails
+      if (v < 0) continue;
+      const lvl = v * (PAL.length - 1), lo = Math.floor(lvl), c = x / cell, r = y / cell;
+      const k = Math.min(PAL.length - 1, lo + ((lvl - lo) > BAYER[(r & 3) * 4 + (c & 3)] ? 1 : 0));
+      paths[k].rect(x, y, cell - 1, cell - 1);
+    }
+    ctx.clearRect(0, 0, w, h);
+    paths.forEach((path, k) => { if (k) { ctx.fillStyle = PAL[k]; ctx.fill(path); } });
+  }
+
   function draw() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const W = box.clientWidth, H = box.clientHeight;
@@ -475,6 +514,7 @@
     const offX = phone ? VW - W : Math.min(VW - W, Math.max(0, .68 * VW - W / 2)); // phones show the right end: sprays + table
     G = { scale: phone ? 1 : .8, W, H, dpr, cols: Math.ceil(W / cell), rows: Math.ceil(H / cell), vcols: Math.ceil(VW / cell), c0: Math.round(offX / cell), xR: VW / H };
     cvs.forEach(cv => { cv.width = W * dpr; cv.height = H * dpr; });
+    layout();
     SCENE.forEach((_, i) => paint(i, 1.7)); // t = 1.7: several bursts open at once (also the still frame for reduced motion)
     parallax();
   }
