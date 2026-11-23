@@ -46,7 +46,7 @@
   .lede { max-width: 400px; margin-top: 32px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
-  /* dithered mountain range, drawn on canvas */
+  /* dithered kenduri scene (canopy tents + buffet table), drawn on canvas */
   #mtn { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 68%; z-index: 0; display: block; }
   /* one canvas per ridge, moved separately on scroll for parallax */
   #mtn canvas { position: absolute; inset: 0; width: 100%; height: 100%; will-change: transform; }
@@ -341,27 +341,49 @@
   // ridged noise (1-|n|) gives a jagged, rocky ridgeline
   const fbm = x => { let s = 0, a = .55, fr = 1; for (let o = 0; o < 5; o++) { s += a * (1 - Math.abs(2 * noise(x * fr + o * 31) - 1)); a *= .48; fr *= 2.2; } return s; };
 
-  // back to front. foot: where the slope meets the bottom (0 top..1 bottom); peak x / height / left & right width
-  // shape a sharp tent; lit: how pale the sunlit left face goes; mist: how much it fades into haze below the crest
-  const LAYERS = [
-    { foot: .80, tone: .60, pu: .60, ph: .70, wl: .50, wr: .26, jag: .05, off: 0,   lit: .42, mist: .40, pow: 1.5 }, // main summit
-    { foot: .84, tone: .40, pu: .28, ph: .42, wl: .30, wr: .30, jag: .06, off: 60,  lit: .25, mist: .45, pow: 1.2 }, // grey peak, left of summit
-    { foot: .92, tone: .34, pu: .08, ph: .24, wl: .30, wr: .35, jag: .05, off: 20,  lit: .20, mist: .50 },           // grey foothill, far left
-    { foot: .90, tone: .68, pu: 1.0, ph: .70, wl: .62, wr: .20, jag: .05, off: 40,  lit: 0,   mist: .50 },           // blue ridge rising right
-    { foot: 1.0, tone: .74, pu: 1.08, ph: .82, wl: .75, wr: .20, jag: .05, off: 90,  lit: 0,   mist: .45 },           // blue band
-    { foot: 1.0, tone: .36, pu: .04, ph: .26, wl: .20, wr: .45, jag: .05, off: 120, lit: .15, mist: .50 },           // grey foreground, bottom left
-    { foot: 1.12, tone: .84, pu: 1.18, ph: .95, wl: .80, wr: .20, jag: .04, off: 150, lit: 0,   mist: .20 }            // bright front slope
+  // Kenduri scene: rows of canopy tents (khemah) receding into the distance, then the buffet table in front.
+  // Sizes are in canvas-height units, so phones keep the same shapes. eave/roof/val: fractions of the height.
+  const TENTS = [ // from: rows start partway across, so the left (behind the text) stays open
+    { eave: .44, tw: .36, roof: .13, val: .035, tone: .34, phase: .10, from: .48 }, // far row, small and misty
+    { eave: .60, tw: .52, roof: .17, val: .045, tone: .52, phase: .62, from: .30 },
+    { eave: .76, tw: .80, roof: .22, val: .055, tone: .72, phase: .30, from: .12 }  // nearest row
   ];
-
+  const TABLE = { top: .88, tone: .95, sp: .26, rd: .085, band: .03 };  // tudung saji domes on a dressed table
+  const LAYERS = [...TENTS, TABLE];
   const cvs = LAYERS.map(() => box.appendChild(document.createElement('canvas')));
   const cell = 3;
+  const frac = x => x - Math.floor(x);
+  const hang = f => .45 + .55 * Math.sqrt(Math.max(0, 1 - (2 * f - 1) ** 2)); // one scallop of a valance edge
+
+  // one column of a tent row: where it starts, and the shade of each cell below that
+  function tentCol(L, x, H, rows, vw) {
+    const tw = L.tw * H, t = frac(x / tw + L.phase);
+    if ((x / tw + L.phase - t) * tw - L.phase * tw < L.from * vw) return { top: rows, at: () => 0 }; // whole tents only
+    const n = Math.max(3, Math.round(tw / (cell * 10))); // scallops at least ~10 cells wide, or they alias
+    const top = (L.eave - L.roof * (1 - Math.abs(2 * t - 1)) ** 1.5) * rows; // concave sides, peaked top
+    const eave = L.eave * rows, valB = (L.eave + L.val * hang(frac(t * n))) * rows;
+    const pole = Math.min(t, 1 - t) * tw < cell * 1.6;
+    return { top, at: r =>
+      r < eave ? L.tone * (t < .5 ? .5 : .78)        // canopy roof: sunlit left half, shaded right half
+      : r < valB ? L.tone * 1.12                       // scalloped valance band
+      : pole ? L.tone * .3                             // pale tent pole
+      : L.tone * (.8 - .5 * Math.min(1, (r - valB) / (rows * .14))) }; // soft shade under the canopy, misting toward the ground
+  }
+
+  function tableCol(x, H, rows) {
+    const sp = TABLE.sp * H, rd = TABLE.rd * H, dx = frac(x / sp + .5) * sp - sp / 2; // distance to the nearest dome centre
+    const tableR = TABLE.top * rows, dome = Math.abs(dx) < rd;
+    let top = dome ? (TABLE.top - TABLE.rd * .85 * Math.sqrt(1 - (dx / rd) ** 2)) * rows : tableR;
+    if (Math.abs(dx) < cell * 1.5) top -= 2.5; // little knob on each tudung saji
+    const bandB = (TABLE.top + TABLE.band * hang(frac(x / (sp / 4)))) * rows;
+    return { top, at: r => r < tableR ? TABLE.tone * (dx < 0 ? .62 : 1) : r < bandB ? TABLE.tone : .18 };
+  }
 
   function draw() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const W = box.clientWidth, H = box.clientHeight;
     const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
-    // Narrow screens see a crop of the desktop-shaped scene (like a cover photo) instead of
-    // squeezing every peak into a spike: lay it out on a virtual width, then show a window around the summit.
+    // Narrow screens see a crop of the desktop-shaped scene (like a cover photo) instead of a squeezed one.
     const VW = Math.max(W, H * 2), offX = Math.min(VW - W, Math.max(0, .6 * VW - W / 2));
     const vcols = Math.ceil(VW / cell), c0 = Math.round(offX / cell);
 
@@ -369,26 +391,15 @@
       const cv = cvs[i], ctx = cv.getContext('2d');
       cv.width = W * dpr; cv.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const ys = new Float32Array(cols + 1), sh = new Float32Array(cols + 1);
-      for (let c = 0; c <= cols; c++) {
-        const vc = c + c0, u = vc / vcols;
-        sh[c] = 1 - L.lit / (1 + Math.exp((u - L.pu) * 60)); // sunlit left face pale, soft blend at the summit
-        const tent = Math.max(0, 1 - (u < L.pu ? (L.pu - u) / L.wl : (u - L.pu) / L.wr)) ** (L.pow || 1); // pow > 1: concave sides, needle tip
-        const p = vc * cell / Math.max(H, 420) * 2.4; // noise in height units, so narrow screens don't squash it
-        ys[c] = (L.foot - L.ph * tent - L.jag * (fbm(p + L.off) - .5) * (.4 + tent)) * rows;
-      }
-
       const paths = PAL.map(() => new Path2D()); // batch dots by colour: one fill per colour instead of one per dot
+
       for (let c = 0; c < cols; c++) {
-        const vc = c + c0, u = vc / vcols, fadeIn = Math.min(1.2, .58 + u * .75); // paler grey on the left, extra blue toward the right
-        for (let r = Math.max(0, Math.ceil(ys[c])); r < rows; r++) {
-          const d = r - ys[c];
-          const depth = Math.min(1, d / (rows * .18)); // short fade: each range reads as its own layer
-          let v = Math.max(.14, L.tone * sh[c] * (1 - L.mist * depth)); // crest strongest, mist below; floor keeps snow visible
-          // rock strata that follow the ridgeline (d = cells below the crest) + fine speckle
-          const tex = .55 * noise2(vc / 20, d / 2.5) + .45 * noise2(vc / 4 + 50, d / 4) - .5;
-          v = Math.max(0, Math.min(1, (v + tex * .42 * (.3 + L.tone)) * fadeIn));
+        const vc = c + c0, u = vc / vcols, fadeIn = Math.min(1.15, .7 + u * .5); // greyer on the left, bluer on the right
+        const col = L === TABLE ? tableCol(vc * cell, H, rows) : tentCol(L, vc * cell, H, rows, VW);
+        for (let r = Math.max(0, Math.ceil(col.top)); r < rows; r++) {
+          const d = r - col.top;
+          const tex = .55 * noise2(vc / 20, d / 2.5) + .45 * noise2(vc / 4 + 50, d / 4) - .5; // fabric/grain speckle
+          const v = Math.max(0, Math.min(1, (col.at(r) + tex * .22 * (.3 + L.tone)) * fadeIn));
           const x = v * (PAL.length - 1), lo = Math.floor(x);
           // half ordered, half random threshold: grainy halftone instead of a clean checker grid
           let h = Math.imul(c, 374761393) + Math.imul(r, 668265263) | 0;
@@ -397,7 +408,7 @@
           paths[Math.min(PAL.length - 1, lo + ((x - lo) > thr ? 1 : 0))].rect(c * cell, r * cell, cell - 1, cell - 1);
         }
       }
-      // ivory dots still get painted on front ranges so they hide the ranges behind them
+      // ivory dots still get painted on front layers so they hide the layers behind them
       paths.forEach((path, k) => { if (k || i) { ctx.fillStyle = PAL[k]; ctx.fill(path); } });
     });
     parallax();
