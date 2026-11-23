@@ -46,7 +46,7 @@
   .lede { max-width: 400px; margin-top: 32px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
-  /* dithered kenduri scene (bunga manggar, ketupat, feast table), drawn on canvas */
+  /* dithered kenduri scene (fireworks, ketupat garland, feast table), drawn on canvas */
   #mtn { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 68%; z-index: 0; display: block; }
   /* one canvas per ridge, moved separately on scroll for parallax */
   #mtn canvas { position: absolute; inset: 0; width: 100%; height: 100%; will-change: transform; }
@@ -341,7 +341,7 @@
   // ridged noise (1-|n|) gives a jagged, rocky ridgeline
   const fbm = x => { let s = 0, a = .55, fr = 1; for (let o = 0; o < 5; o++) { s += a * (1 - Math.abs(2 * noise(x * fr + o * 31) - 1)); a *= .48; fr *= 2.2; } return s; };
 
-  // Kenduri scene, back to front: bunga manggar sprays (animated like fireworks), hanging ketupat, the feast table.
+  // Kenduri scene, back to front: fireworks (animated), a ketupat garland, the feast table.
   // Units are canvas heights (Y 0 top .. 1 bottom); xR is the right edge, so the scene hugs the right and leaves the text side open.
   const cell = 3;
   const frac = x => x - Math.floor(x);
@@ -351,41 +351,79 @@
   const segDist = (X, Y, ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, t = clamp(((X - ax) * dx + (Y - ay) * dy) / (dx * dx + dy * dy)); return Math.hypot(X - ax - t * dx, Y - ay - t * dy); };
   const twinkle = (c, r, f) => { let h = Math.imul(c, 73856093) ^ Math.imul(r, 19349663) ^ Math.imul(f, 83492791); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
-  // [distance from right edge, top Y, radius]
-  const SPRAYS = [[1.15, .36, .13], [.95, .22, .16], [.72, .13, .18], [.5, .24, .16], [.28, .38, .13]];
-  function manggar(X, Y, xR, t, c, r) {
-    for (let i = 0; i < SPRAYS.length; i++) {
-      const [off, top, R] = SPRAYS[i], x = xR - off;
-      // each spray bursts open (fast ease-out), sparkles, dims a little, then bursts again; staggered per spray
-      const p = frac(t / 3.2 + i * .21), grow = .3 + .7 * (1 - (1 - clamp(p / .3)) ** 3), glow = p < .6 ? 1 : 1 - .45 * (p - .6) / .4;
-      const Rg = R * grow, dx = X - x, dy = Y - top - .3 * dx * dx / R, d = Math.hypot(dx, dy); // strands droop toward their tips
-      if (d < Rg && d > .012) {
-        const k = frac(Math.atan2(dy, dx) / (2 * Math.PI) * 24 + d * 3);
-        if (k < .17) return d > Rg * .8 ? (twinkle(c, r, Math.floor(t * 10)) > .45 ? .95 : .5) * glow : (.45 + .4 * d / R) * glow;
+  // [distance from right edge, burst height Y, burst radius]
+  const FIREWORKS = [[1.6, .1, .12], [1.05, .16, .16], [.8, .3, .13], [.55, .1, .18], [.3, .26, .14]];
+  function fireworks(X, Y, xR, t, c, r) {
+    for (let i = 0; i < FIREWORKS.length; i++) {
+      const [off, apex, R] = FIREWORKS[i], x = xR - off, p = frac(t / 3.4 + i * .23);
+      if (p < .28) { // rocket: shoots up from behind the table, slowing near the top, short fading trail
+        const e = 1 - (1 - p / .28) ** 2, ry = .72 - (.72 - apex) * e;
+        if (Math.abs(X - x) < .009 && Math.abs(Y - ry) < .01) return .95;
+        if (Math.abs(X - x) < .005 && Y > ry && Y < ry + .09) return .2 + .6 * (1 - (Y - ry) / .09);
+        continue;
       }
-      if (d <= .016) return .95;
-      if (Math.abs(dx) < .007 && Y > top && Y < .75) return .78; // pole
+      // burst: strands race outward, then the centre empties, the whole burst sags with gravity and fades
+      const q = (p - .28) / .72, grow = 1 - (1 - Math.min(1, q / .35)) ** 3, fade = q < .4 ? 1 : 1 - (q - .4) / .6;
+      const Rg = R * grow, dx = X - x, dy = Y - apex - .12 * q * q, d = Math.hypot(dx, dy);
+      if (d < Rg && d > Rg * Math.max(.08, (q - .1) * .9)) {
+        const k = frac(Math.atan2(dy, dx) / (2 * Math.PI) * 22);
+        if (k < .16) {
+          const v = (d > Rg * .82 ? (twinkle(c, r, Math.floor(t * 10)) > .4 ? .95 : .5) : .55) * fade;
+          if (v > .08) return v;
+        }
+      }
     }
     return -1;
   }
 
-  const KETUPAT = [[1.52, .32, .075], [1.36, .48, .095], [1.2, .27, .07]]; // [distance from right edge, centre Y, half-size]
+  // a sagging garland of ketupat across the open lower-left, at scene units from the right edge
+  const GARLAND = { from: 2.35, to: 1.25, y0: .2, y1: .16, sag: .08 };
+  const garlandY = X => { const s = (X - GARLAND.ax) / (GARLAND.bx - GARLAND.ax); return GARLAND.y0 + (GARLAND.y1 - GARLAND.y0) * s + GARLAND.sag * 4 * s * (1 - s); };
   function ketupat(X, Y, xR) {
-    for (const [off, cy, sz] of KETUPAT) {
-      const dx = X - (xR - off), dy = Y - cy;
+    GARLAND.ax = xR - GARLAND.from; GARLAND.bx = xR - GARLAND.to;
+    if (X < GARLAND.ax || X > GARLAND.bx) return -1;
+    if (Math.abs(Y - garlandY(X)) < .005) return .6; // the string
+    for (const [s, sz] of [[.14, .06], [.38, .075], [.62, .065], [.86, .075]]) {
+      const xk = GARLAND.ax + (GARLAND.bx - GARLAND.ax) * s, yk = garlandY(xk), cy = yk + .03 + sz, dx = X - xk, dy = Y - cy;
       if (Math.abs(dx) / sz + Math.abs(dy) / sz <= 1) { // woven diamond
         const check = ((Math.floor((dx + dy) * 34) + Math.floor((dx - dy) * 34)) & 1) === 1;
         return (check ? .5 : .85) - (dx < 0 ? .15 : 0);
       }
-      if (Math.abs(dx) < .004 && Y < cy - sz && Y > cy - sz - .2) return .55; // short string, kept clear of the headline
-      if (Y > cy + sz && Y < cy + sz + .09) for (const k of [-1, 1]) if (Math.abs(dx - k * (Y - cy - sz) * .35) < .006) return .75; // tails
+      if (Math.abs(dx) < .004 && Y > yk && Y < cy - sz) return .6; // drop
+      if (Y > cy + sz && Y < cy + sz + .07) for (const k of [-1, 1]) if (Math.abs(dx - k * (Y - cy - sz) * .35) < .006) return .75; // tails
     }
     return -1;
   }
 
   function feast(X, Y, xR) {
     const top = .72;
-    if (Y >= top && X > xR - 1.45) return Y < top + .045 * hang(frac(X * 8)) ? .95 : .13;          // scalloped table cloth
+    if (Y >= top) return Y < top + .045 * hang(frac(X * 8)) ? .95 : .13;                          // scalloped table cloth, edge to edge
+    // simple place settings along the long left stretch, repeating bowl, glasses, plates, small tudung saji
+    const L = xR - xR / G.scale, slot = .32, k = Math.floor((X - L) / slot), cx = L + (k + .5) * slot, dx = X - cx;
+    if (k >= 0 && cx < xR - 2.5) {
+      const type = k % 4;
+      if (type === 0 && Y < top && Y > top - .08 && inEll(X, Y, cx, top - .08, .08, .08)) return Y < top - .065 ? .7 : .9;      // bowl
+      if (type === 1 && Y < top && Y > top - .08 && (Math.abs(dx + .03) < .02 || Math.abs(dx - .03) < .02)) return Y < top - .066 ? .85 : .35; // glasses
+      if (type === 2 && Y < top && Y > top - .08 && Math.abs(dx) < .07) return frac((top - Y) / .02) < .55 ? .9 : .3;          // plates
+      if (type === 3) {
+        if (inEll(X, Y, cx, top - .125, .02, .016)) return .95;                                                                  // knob
+        if (Y < top && inEll(X, Y, cx, top, .1, .11)) { const w = (frac((dx + Y) * 13) < .5) !== (frac((dx - Y) * 13) < .5); return (w ? .5 : .78) - (dx < 0 ? .15 : 0); }
+      }
+    }
+    // left end of the table: bunga telur, glasses, a small tudung saji
+    const bt = xR - 2.2;
+    if (inEll(X, Y, bt, top - .045, .045, .045)) return X < bt ? .55 : .85;                         // vase
+    for (const [ox, oy] of [[-.11, .2], [-.055, .25], [0, .27], [.055, .25], [.11, .2]]) {
+      const tx = bt + ox, ty = top - oy;
+      if (segDist(X, Y, bt, top - .08, tx, ty) < .004) return .6;                                    // stick
+      if (inEll(X, Y, tx, ty, .018, .024)) return X < tx ? .25 : .45;                                // egg
+      const fd = Math.hypot(X - tx, Y - (ty - .035));
+      if (fd > .01 && fd < .028 && frac(Math.atan2(Y - ty + .035, X - tx) / (2 * Math.PI) * 6) < .5) return .9; // paper flower
+    }
+    for (const gx of [xR - 1.93, xR - 1.84]) if (Math.abs(X - gx) < .025 && Y < top && Y > top - .09) return Y < top - .075 ? .85 : .35; // glasses
+    const ts = xR - 1.6;
+    if (inEll(X, Y, ts, top - .165, .025, .02)) return .95;                                         // tudung saji knob
+    if (Y < top && inEll(X, Y, ts, top, .14, .15)) { const u = X - ts, w = (frac((u + Y) * 13) < .5) !== (frac((u - Y) * 13) < .5); return (w ? .5 : .78) - (u < 0 ? .15 : 0); }
     const rice = xR - 1.15, bowl = xR - .8, pot = xR - .53;
     if (Y >= top - .035 && Y < top && Math.abs(X - rice) < .24) return .8;                         // dulang
     if (Y < top - .035 && inEll(X, Y, rice, top - .035, .2, .18)) return .18 + .3 * clamp((X - rice + .2) / .4); // nasi minyak dome
@@ -400,7 +438,7 @@
     return -1;
   }
 
-  const SCENE = [manggar, ketupat, feast]; // back to front; parallax speeds follow this order
+  const SCENE = [fireworks, ketupat, feast]; // back to front; parallax speeds follow this order
   const cvs = SCENE.map(() => box.appendChild(document.createElement('canvas')));
   let G = null; // sizes for the current layout
 
@@ -437,18 +475,18 @@
     const offX = phone ? VW - W : Math.min(VW - W, Math.max(0, .68 * VW - W / 2)); // phones show the right end: sprays + table
     G = { scale: phone ? 1 : .8, W, H, dpr, cols: Math.ceil(W / cell), rows: Math.ceil(H / cell), vcols: Math.ceil(VW / cell), c0: Math.round(offX / cell), xR: VW / H };
     cvs.forEach(cv => { cv.width = W * dpr; cv.height = H * dpr; });
-    SCENE.forEach((_, i) => paint(i, 1)); // t = 1: sprays fully open (also the still frame for reduced motion)
+    SCENE.forEach((_, i) => paint(i, 1.7)); // t = 1.7: several bursts open at once (also the still frame for reduced motion)
     parallax();
   }
 
-  // fireworks: repaint only the manggar layer, ~30 fps, only while the hero is on screen
+  // fireworks: repaint only that layer, ~30 fps, only while the hero is on screen
   let last = 0;
   const t0 = performance.now();
   function tick(now) {
     requestAnimationFrame(tick);
     if (!G || still.matches || now - last < 33 || scrollY > hero.offsetHeight) return;
     last = now;
-    paint(0, 1 + (now - t0) / 1000);
+    paint(0, 1.7 + (now - t0) / 1000);
   }
 
   // parallax: far ranges lag behind the scroll, the front slope moves with the page
