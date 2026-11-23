@@ -58,6 +58,15 @@
   .lede, .ctas { opacity: 0; animation: fade-up .8s ease-out .35s forwards; }
   .ctas { animation-delay: .45s; }
   @keyframes rise { to { transform: none; } }
+
+  /* rotating word: old word drops out below, the next drops in from above, the gap eases to the new width.
+     clip-path (not overflow) does the masking so the word stays on the sentence's baseline */
+  .rot { position: relative; display: inline-block; white-space: nowrap; padding: .1em 0 .25em; margin: -.1em 0 -.25em; clip-path: inset(0); transition: width .5s cubic-bezier(.65, 0, .35, 1); }
+  .rot > span { display: inline-block; }
+  .rot > .in { position: absolute; left: 0; top: .1em; animation: drop-in .55s cubic-bezier(.2, .7, .2, 1) .18s both; } /* starts once the old word is mostly gone */
+  .rot > .out { animation: drop-out .3s cubic-bezier(.5, 0, .75, 0) both; }
+  @keyframes drop-in { from { transform: translateY(-115%); opacity: 0; } }
+  @keyframes drop-out { to { transform: translateY(115%); opacity: 0; } }
   @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { h1 .line > span, .lede, .ctas { animation: none; transform: none; opacity: 1; } }
 
@@ -155,7 +164,7 @@
       </div>
     </nav>
 
-    <h1><span class="line"><span>Every <span class="b">kenduri</span> deserves</span></span><span class="line"><span>a caterer <span class="s">you can trust.</span></span></span></h1>
+    <h1 aria-label="Every kenduri deserves a caterer you can trust."><span class="line"><span>Every <span class="b rot"><span>kenduri</span></span> deserves</span></span><span class="line"><span>a caterer <span class="s">you can trust.</span></span></span></h1>
     <p class="lede">Find verified halal caterers, check their hygiene ratings and real reviews, and book the right one for your kenduri in minutes.</p>
     <div class="ctas">
       <a class="btn btn-primary mono" href="#">Find a caterer <span aria-hidden="true">&rarr;</span></a>
@@ -401,6 +410,28 @@
 
   let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 120); });
   draw();
+})();
+</script>
+<script>
+// headline word rotator
+(() => {
+  const rot = document.querySelector('.rot');
+  if (!rot || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const words = ['kenduri', 'wedding', 'majlis', 'aqiqah', 'dinner', 'reunion'];
+  let i = 0;
+  // width in em, so it still fits when the headline font scales on resize
+  const width = el => el.offsetWidth / parseFloat(getComputedStyle(rot).fontSize) + 'em';
+  rot.style.width = width(rot.firstElementChild);
+  setInterval(() => {
+    if (document.hidden || rot.querySelector('.in')) return; // never stack swaps (animations pause in background tabs)
+    const old = rot.firstElementChild, next = document.createElement('span');
+    next.textContent = words[i = (i + 1) % words.length];
+    next.className = 'in';
+    rot.append(next);
+    old.className = 'out';
+    rot.style.width = width(next);
+    next.addEventListener('animationend', () => { old.remove(); next.className = ''; }, { once: true });
+  }, 2600);
 })();
 </script>
 </body>
