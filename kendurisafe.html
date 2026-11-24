@@ -461,7 +461,7 @@
 
   // Measure where the text sits so the ketupat and fireworks keep clear of it.
   function layout() {
-    const { W, H, c0 } = G, hb = hero.getBoundingClientRect(), b = box.getBoundingClientRect();
+    const { W, H, c0, xR } = G, hb = hero.getBoundingClientRect(), b = box.getBoundingClientRect();
     const h1 = hero.querySelector('h1').getBoundingClientRect(), nav = hero.querySelector('nav').getBoundingClientRect();
     const ctas = hero.querySelector('.ctas').getBoundingClientRect(), lede = hero.querySelector('.lede').getBoundingClientRect();
     const btns = hero.querySelector('.ctas').lastElementChild.getBoundingClientRect(); // .ctas itself is full-width
@@ -481,13 +481,17 @@
     for (let i = 0; i < n; i++) {
       const x = x0 + (i + .5) * (x1 - x0) / n + (N[i * 7 & 511] - .5) * .12;
       let R = .1 + .06 * N[i * 13 & 511], apex = .1 + .22 * N[i * 29 & 511];
-      if ((x - x0) * H < h1.right - b.left + R * H) apex = Math.max(apex, (h1.bottom - b.top) / H + .03 + R); // never over the headline
-      if ((x - x0) * H < textR + R * H) {                      // under the text column: burst below the buttons
-        R = Math.min(R, (table - .1 - below) / 2);
-        apex = Math.max(apex, below + R);
-      }
+      // ceiling: never over the headline, and under the text column never over the buttons
+      let ceil = .03;
+      if ((x - x0) * H < h1.right - b.left + R * H) ceil = Math.max(ceil, (h1.bottom - b.top) / H + .03);
+      if ((x - x0) * H < textR + R * H) ceil = Math.max(ceil, below);
+      // floor: the whole burst, including its fall (SAG), stays in the sky above the dishes at this spot
+      const Xs = xR - (xR - x) / G.scale, dish = Xs > xR - 2.45 ? .3 : .13; // tall show-pieces on the right, low place settings on the left
+      const floor = table - dish * G.scale - SAG - .02;
+      R = Math.min(R, (floor - ceil) / 2);
+      apex = Math.min(Math.max(apex, ceil + R), floor - R);
       if (Math.abs(x - kX) < R + .1 && apex - R < kBottom) continue; // keep clear of the ketupat
-      if (R >= .05 && apex + R < table - .02) G.fw.push([x, apex, R, N[i * 31 & 511]]);
+      if (R >= .045) G.fw.push([x, apex, R, N[i * 31 & 511]]);
     }
   }
 
