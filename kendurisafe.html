@@ -423,6 +423,8 @@
   }
 
   const SCENE = [fireworks, feast]; // back to front; parallax speeds follow this order
+  // fireworks get their own warm ramp (orange is royal blue's complement); everything else uses PAL
+  const FIRE = ['#FEFEFD', '#FDEBD8', '#FCD3A8', '#FAB36E', '#F8963F', '#F47B1C', '#E8650C', '#D45207'];
   const cvs = SCENE.map(() => box.appendChild(document.createElement('canvas')));
   let G = null; // sizes for the current layout
 
@@ -430,25 +432,26 @@
     const { W, H, cols, rows, c0, vcols, xR, dpr } = G, ctx = cvs[i].getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
-    const paths = PAL.map(() => new Path2D()); // batch dots by colour: one fill per colour instead of one per dot
+    const pal = SCENE[i] === fireworks ? FIRE : PAL;
+    const paths = pal.map(() => new Path2D()); // batch dots by colour: one fill per colour instead of one per dot
     for (let c = 0; c < cols; c++) {
-      const vc = c + c0, X = vc * cell / H, fadeIn = Math.min(1.15, .7 + vc / vcols * .5); // greyer left, bluer right
+      const vc = c + c0, X = vc * cell / H, fadeIn = pal === FIRE ? 1 : Math.min(1.15, .7 + vc / vcols * .5); // greyer left, bluer right (not for fireworks)
       for (let r = 0; r < rows; r++) {
         // desktop: scene drawn at 80% size, anchored bottom-right so it stays clear of the headline; phones: full size
         let v = SCENE[i](xR - (xR - X) / G.scale, 1 - (1 - r * cell / H) / G.scale, xR, t, c, r, X, r * cell / H);
         if (v < 0) continue;
         const tex = .55 * noise2(vc / 20, r / 2.5) + .45 * noise2(vc / 4 + 50, r / 4) - .5; // grain speckle
         v = clamp((v + tex * .14) * fadeIn);
-        const x = v * (PAL.length - 1), lo = Math.floor(x);
+        const x = v * (pal.length - 1), lo = Math.floor(x);
         // half ordered, half random threshold: grainy halftone instead of a clean checker grid
         let h = Math.imul(c, 374761393) + Math.imul(r, 668265263) | 0;
         h = Math.imul(h ^ (h >>> 13), 1274126177);
         const thr = .5 * BAYER[(r & 3) * 4 + (c & 3)] + .5 * (((h ^ (h >>> 16)) >>> 0) / 4294967296);
-        paths[Math.min(PAL.length - 1, lo + ((x - lo) > thr ? 1 : 0))].rect(c * cell, r * cell, cell - 1, cell - 1);
+        paths[Math.min(pal.length - 1, lo + ((x - lo) > thr ? 1 : 0))].rect(c * cell, r * cell, cell - 1, cell - 1);
       }
     }
     // ivory dots still get painted on front layers so they hide the layers behind them
-    paths.forEach((path, k) => { if (k || i) { ctx.fillStyle = PAL[k]; ctx.fill(path); } });
+    paths.forEach((path, k) => { if (k || i) { ctx.fillStyle = pal[k]; ctx.fill(path); } });
   }
 
   // One hanging ketupat on its own small canvas, so its string can start at the menu line above the scene.
