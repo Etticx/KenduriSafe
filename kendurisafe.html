@@ -354,6 +354,7 @@
 
   // Fireworks are laid out per screen in layout(): spread along the whole table, and under the text column
   // they burst below the buttons. They use raw canvas units (X, Y), not the scaled scene.
+  const SAG = .06; // how far a burst falls before it fades
   function fireworks(Xs, Ys, xR, t, c, r, X, Y) {
     const table = 1 - (1 - .72) * G.scale;
     for (const [x, apex, R, ph] of G.fw) {
@@ -367,7 +368,7 @@
       }
       // burst: strands race outward, then the centre empties, the whole burst sags with gravity and fades
       const q = (p - .28) / .72, grow = 1 - (1 - Math.min(1, q / .35)) ** 3, fade = q < .4 ? 1 : 1 - (q - .4) / .6;
-      const Rg = R * grow, dx = X - x, dy = Y - apex - .12 * q * q, d = Math.hypot(dx, dy);
+      const Rg = R * grow, dx = X - x, dy = Y - apex - SAG * q * q, d = Math.hypot(dx, dy);
       if (d < Rg && d > Rg * Math.max(.08, (q - .1) * .9)) {
         const k = frac(Math.atan2(dy, dx) / (2 * Math.PI) * 22);
         if (k < .16) {
