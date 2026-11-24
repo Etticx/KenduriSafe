@@ -477,6 +477,7 @@
     for (let i = 0; i < n; i++) {
       const x = x0 + (i + .5) * (x1 - x0) / n + (N[i * 7 & 511] - .5) * .12;
       let R = .1 + .06 * N[i * 13 & 511], apex = .1 + .22 * N[i * 29 & 511];
+      if ((x - x0) * H < h1.right - b.left + R * H) apex = Math.max(apex, (h1.bottom - b.top) / H + .03 + R); // never over the headline
       if ((x - x0) * H < textR + R * H) {                      // under the text column: burst below the buttons
         R = Math.min(R, (table - .1 - below) / 2);
         apex = Math.max(apex, below + R);
