@@ -460,7 +460,8 @@
     const { W, H, c0 } = G, hb = hero.getBoundingClientRect(), b = box.getBoundingClientRect();
     const h1 = hero.querySelector('h1').getBoundingClientRect(), nav = hero.querySelector('nav').getBoundingClientRect();
     const ctas = hero.querySelector('.ctas').getBoundingClientRect(), lede = hero.querySelector('.lede').getBoundingClientRect();
-    const textL = h1.left - hb.left, textR = Math.max(ctas.right, lede.right) - b.left;
+    const btns = hero.querySelector('.ctas').lastElementChild.getBoundingClientRect(); // .ctas itself is full-width
+    const textL = h1.left - hb.left, textR = Math.max(btns.right, lede.right) - b.left;
     const below = (ctas.bottom - b.top) / H + .05;               // first canvas row clear of the buttons
     const table = 1 - (1 - .72) * G.scale;
     // ketupat: in the empty margin left of the headline when there is room, otherwise just under the buttons
