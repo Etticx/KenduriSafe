@@ -623,5 +623,20 @@
   }, 2600);
 })();
 </script>
+<script>
+// Caterers menu: opens on hover (short delay, so passing over it doesn't flash it), on click/tap and from the keyboard
+(() => {
+  const dd = document.querySelector('[data-dd]'), btn = dd.querySelector('.dd-btn'), hover = matchMedia('(hover: hover)');
+  let timer;
+  const set = open => { clearTimeout(timer); dd.classList.toggle('open', open); btn.setAttribute('aria-expanded', open); };
+  const later = (open, ms) => { clearTimeout(timer); timer = setTimeout(() => set(open), ms); };
+  dd.addEventListener('mouseenter', () => { if (hover.matches) later(true, 120); });
+  dd.addEventListener('mouseleave', () => { if (hover.matches) later(false, 160); }); // grace period to reach the panel
+  btn.addEventListener('click', () => set(!dd.classList.contains('open')));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && dd.classList.contains('open')) { set(false); btn.focus(); } });
+  document.addEventListener('click', e => { if (!dd.contains(e.target)) set(false); });
+  dd.addEventListener('focusout', e => { if (!dd.contains(e.relatedTarget)) set(false); });
+})();
+</script>
 </body>
 </html>
