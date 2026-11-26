@@ -210,6 +210,11 @@
   }
   draw(0);
   new ResizeObserver(() => draw(0)).observe(cv);
+  // steam drifts at ~20fps, only while the kawah is on screen and motion is allowed
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let on = false, last = 0;
+  const tick = now => { if (!on) return; if (now - last > 50) { last = now; draw(now / 1000); } requestAnimationFrame(tick); };
+  new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on) requestAnimationFrame(tick); }).observe(cv);
 })();
 </script>
 <script>
