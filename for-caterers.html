@@ -170,6 +170,32 @@
   @media (max-width: 1000px) { .join { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 760px) { .join { grid-template-columns: 1fr; } .join li::before { margin-bottom: 20px; } }
 
+  /* pricing */
+  .plans { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: stretch; }
+  .plan { display: flex; flex-direction: column; padding: 36px 32px; background: #fff; border: 1px solid var(--line); }
+  .plan.pro { background: var(--coal); color: var(--ivory); border-color: var(--coal); }
+  .plan .mono:first-child, .fee .mono { color: var(--blue); }
+  .plan.pro .mono:first-child { color: var(--blue-soft); }
+  .tag { margin-left: 8px; padding: 3px 6px; font-size: 10px; color: #fff; background: var(--blue); }
+  .price { display: flex; align-items: baseline; gap: 8px; margin-top: 24px; }
+  .price b { font-size: 52px; font-weight: 500; letter-spacing: -.04em; }
+  .price span { color: var(--ink-2); font-size: 14px; }
+  .pro .price span, .pro .for { color: rgba(254, 254, 253, .7); }
+  .for { margin-top: 8px; color: var(--ink-2); font-size: 15px; }
+  .plan ul { list-style: none; margin: 28px 0 32px; }
+  .plan li { padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+  .pro li { border-color: rgba(254, 254, 253, .14); }
+  .plan li::before { content: "\2713\00a0\00a0"; color: var(--blue); }
+  .pro li::before { color: var(--blue-soft); }
+  .plan .btn { margin-top: auto; align-self: flex-start; }
+  .pro .btn-primary { background: var(--ivory); color: var(--blue); border-color: var(--ivory); }
+  .pro .btn-primary:hover { background: #eef3fd; }
+  .fee { padding: 36px 32px; border: 1px dashed #c9d7f6; background: radial-gradient(#dbe5f8 1px, transparent 1.5px) 0 0 / 6px 6px, var(--ivory); }
+  .fee .price b { color: var(--blue); }
+  .fee p:last-child { margin-top: 16px; color: var(--ink-2); line-height: 1.55; font-size: 15px; }
+  @media (max-width: 1000px) { .plans { grid-template-columns: 1fr 1fr; } .fee { grid-column: 1 / -1; } }
+  @media (max-width: 760px) { .plans { grid-template-columns: 1fr; } .plan, .fee { padding: 28px 24px; } }
+
   footer { padding: 28px 0; font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line); }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
@@ -354,6 +380,47 @@
     <div class="prep">
       <span class="mono">Have these ready</span>
       <span class="chip">MyKad (IC)</span><span class="chip">Phone with a camera</span><span class="chip">SSM or LHDN number</span><span class="chip">Bank account in your name</span><span class="chip">Your menu and prices</span>
+    </div>
+  </div>
+</section>
+
+<!-- shortcut: prices from the group plan (Basic free, Pro ~RM49, ~1.5-2% per booking); update once the caterer survey settles them -->
+<section class="block" id="pricing">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow mono">Pricing</p>
+      <h2>Free to start. Upgrade when you&rsquo;re <span class="b">busy.</span></h2>
+    </div>
+    <div class="plans">
+      <article class="plan">
+        <p class="mono">Basic</p>
+        <p class="price"><b>RM0</b><span>/ month</span></p>
+        <p class="for">For home-based caterers trying it out.</p>
+        <ul>
+          <li>Up to 3 bookings a month</li>
+          <li>Protected staged payments</li>
+          <li>Digital booking agreement</li>
+          <li>Shared timeline and reminders</li>
+        </ul>
+        <a class="btn btn-ghost mono" href="#join">Start free</a>
+      </article>
+      <article class="plan pro">
+        <p class="mono">Pro <span class="tag">Most caterers</span></p>
+        <p class="price"><b>RM49</b><span>/ month</span></p>
+        <p class="for">For caterers taking bookings every week.</p>
+        <ul>
+          <li>Unlimited bookings</li>
+          <li>Headcount planner</li>
+          <li>Verified badge on your profile</li>
+          <li>Everything in Basic</li>
+        </ul>
+        <a class="btn btn-primary mono" href="#join">Go Pro <span aria-hidden="true">&rarr;</span></a>
+      </article>
+      <div class="fee">
+        <p class="mono">Per booking</p>
+        <p class="price"><b>~1.5&ndash;2%</b></p>
+        <p>A small fee on each booking. Part of it goes into the protection fund that refunds hosts if a caterer runs off, which keeps hosts confident enough to book you.</p>
+      </div>
     </div>
   </div>
 </section>
