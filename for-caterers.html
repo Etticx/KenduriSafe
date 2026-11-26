@@ -196,6 +196,18 @@
   @media (max-width: 1000px) { .plans { grid-template-columns: 1fr 1fr; } .fee { grid-column: 1 / -1; } }
   @media (max-width: 760px) { .plans { grid-template-columns: 1fr; } .plan, .fee { padding: 28px 24px; } }
 
+  /* FAQ: native details/summary, plus sign turns into a minus when open */
+  .faq-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; }
+  .faq details { border-top: 1px solid var(--line); }
+  .faq details:last-child { border-bottom: 1px solid var(--line); }
+  .faq summary { display: flex; justify-content: space-between; gap: 24px; padding: 22px 0; font-size: 18px; font-weight: 500; letter-spacing: -.01em; cursor: pointer; list-style: none; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; flex: none; color: var(--blue); font: 500 20px "JetBrains Mono", monospace; }
+  .faq details[open] summary::after { content: "\2212"; }
+  .faq summary:hover { color: var(--blue); }
+  .faq details p { max-width: 620px; padding-bottom: 24px; color: var(--ink-2); line-height: 1.6; }
+  @media (max-width: 1000px) { .faq-grid { grid-template-columns: 1fr; gap: 40px; } }
+
   footer { padding: 28px 0; font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line); }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
@@ -421,6 +433,41 @@
         <p class="price"><b>~1.5&ndash;2%</b></p>
         <p>A small fee on each booking. Part of it goes into the protection fund that refunds hosts if a caterer runs off, which keeps hosts confident enough to book you.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="faq">
+  <div class="wrap faq-grid">
+    <div>
+      <p class="eyebrow mono">Questions caterers ask</p>
+      <h2>The <span class="b">honest</span> answers.</h2>
+    </div>
+    <div class="faq">
+      <details open>
+        <summary>Is it legal for an app to hold my money?</summary>
+        <p>We don&rsquo;t hold it. Payments sit with Razorpay Curlec, a regulated Malaysian payment gateway, as the Financial Services Act 2013 requires. KenduriSafe only tells Curlec when each stage can be released to you.</p>
+      </details>
+      <details>
+        <summary>What if the host tries to scam me?</summary>
+        <p>The booking is 100% paid before the event, so you never cook on a promise. Your timestamped delivery photos prove the food arrived, payment releases automatically, and late cancellations pay you a cancellation fee.</p>
+      </details>
+      <details>
+        <summary>Do I have to wait until after the event to buy ingredients?</summary>
+        <p>No. Upload your ingredient invoices or receipts any time after the deposit, up to 3 days before the event, and that exact amount is released to you.</p>
+      </details>
+      <details>
+        <summary>What happens if the host says the food was wrong?</summary>
+        <p>They have 48 hours to raise a dispute. The remaining money is frozen, both sides submit evidence within 3 days, and our team decides within 7 days. If it still isn&rsquo;t settled, it goes to the Consumer Claims Tribunal.</p>
+      </details>
+      <details>
+        <summary>I cook from home without SSM. Can I join?</summary>
+        <p>Yes. Home-based caterers can verify with LHDN registration instead of SSM, as long as the bank account is in the same name.</p>
+      </details>
+      <details>
+        <summary>Why do you check Semak Mule?</summary>
+        <p>So hosts know your bank account isn&rsquo;t linked to scams. It&rsquo;s the reason a verified badge means something, and why hosts are willing to book a caterer they&rsquo;ve never met.</p>
+      </details>
     </div>
   </div>
 </section>
