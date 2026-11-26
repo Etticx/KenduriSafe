@@ -99,6 +99,17 @@
   .chip { border: 1px solid var(--line); padding: 6px 10px; font-size: 13px; background: var(--ivory); }
   .chip.ok { color: var(--blue); border-color: #c9d7f6; background: #eef3fd; }
 
+  /* problems caterers face, each with its source */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); background: #fff; }
+  .stat { display: flex; flex-direction: column; gap: 12px; padding: 32px 28px; }
+  .stat + .stat { border-left: 1px solid var(--line); }
+  .stat b { font-size: clamp(36px, 3.6vw, 52px); font-weight: 500; letter-spacing: -.04em; color: var(--blue); }
+  .stat h3 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+  .stat p { color: var(--ink-2); line-height: 1.5; font-size: 15px; }
+  .src { margin-top: auto; padding-top: 8px; font-size: 11px; color: var(--ink-2); }
+  .src:hover { color: var(--blue); }
+  @media (max-width: 760px) { .stats { grid-template-columns: 1fr; } .stat + .stat { border-left: 0; border-top: 1px solid var(--line); } }
+
   footer { padding: 28px 0; font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line); }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
@@ -156,6 +167,20 @@
     </div>
   </div>
 </header>
+
+<section class="block" id="problems">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow mono">Sound familiar?</p>
+      <h2>Catering is hard enough without chasing <span class="b">payments.</span></h2>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>500 &rarr; 1,000</b><h3>More guests than booked</h3><p>Hosts book food for 500, invite 1,000, then blame the caterer when it runs out.</p><a class="src mono" href="https://www.kosmo.com.my/2023/01/08/tuan-rumah-tempah-makanan-500-orang-jemput-1000-tetamu/" target="_blank" rel="noopener">Kosmo, 2023 &nearr;</a></div>
+      <div class="stat"><b>Late cancel</b><h3>After the ingredients are bought</h3><p>The money is already spent at the market, but the host wants the whole deposit back.</p><a class="src mono" href="https://www.kosmo.com.my/2023/01/08/tuan-rumah-tempah-makanan-500-orang-jemput-1000-tetamu/" target="_blank" rel="noopener">Kosmo, 2023 &nearr;</a></div>
+      <div class="stat"><b>66</b><h3>Fake-order scams</h3><p>Cases against caterers and pastry businesses in Perak in one year. Police now advise taking a deposit.</p><a class="src mono" href="https://www.utusan.com.my/nasional/2026/03/penipuan-tempahan-kuih-raya-babitkan-kerugian-rm300000/" target="_blank" rel="noopener">Utusan Malaysia, 2026 &nearr;</a></div>
+    </div>
+  </div>
+</section>
 
 <footer>
   <div class="wrap"><span>&copy; 2026 Amanah Kenduri Sdn Bhd</span><span>A UiTM ENT600 student project</span></div>
