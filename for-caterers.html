@@ -120,6 +120,29 @@
   @media (max-width: 1000px) { .perks { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 760px) { .perks { grid-template-columns: 1fr; } }
 
+  /* payout track: four milestones on a line, the dot fills as the money grows */
+  .track { display: grid; grid-template-columns: repeat(4, 1fr); list-style: none; }
+  .track li { position: relative; display: flex; flex-direction: column; padding: 32px 28px 0 0; border-top: 2px solid var(--line); }
+  .track li::before { content: ""; position: absolute; left: 0; top: -7px; width: 12px; height: 12px; background: var(--blue); }
+  .track li:nth-child(1) { border-top-color: var(--blue-soft); }
+  .track li:nth-child(n+2) { border-top-color: var(--blue); }
+  .track .mono { color: var(--blue); }
+  .track h3 { margin-top: 12px; font-size: 22px; font-weight: 500; letter-spacing: -.02em; }
+  .track p { margin-top: 8px; color: var(--ink-2); line-height: 1.5; font-size: 15px; }
+  .track b { margin-top: 20px; font: 500 12px "JetBrains Mono", monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+
+  /* cancellation protection */
+  .cancel { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; margin-top: 96px; padding: 40px; background: #fff; border: 1px solid var(--line); }
+  .cancel h3 { font-size: 26px; font-weight: 500; letter-spacing: -.02em; }
+  .cancel p { margin-top: 12px; color: var(--ink-2); line-height: 1.55; }
+  .cancel .eyebrow { margin: 0 0 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th { padding: 0 0 12px; text-align: left; font-size: 11px; color: var(--ink-2); font-weight: 500; }
+  td { padding: 16px 0; border-top: 1px solid var(--line); }
+  td b { color: var(--blue); font-weight: 600; }
+  @media (max-width: 1000px) { .track { grid-template-columns: 1fr 1fr; row-gap: 40px; } .cancel { grid-template-columns: 1fr; gap: 32px; } }
+  @media (max-width: 760px) { .track { grid-template-columns: 1fr; } .cancel { padding: 24px; } td + td { padding-left: 12px; } }
+
   footer { padding: 28px 0; font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line); }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
@@ -229,6 +252,38 @@
         <h3>A verified badge</h3>
         <p>Pass our checks once and hosts can see you&rsquo;re real. Reviews only come from real bookings.</p>
       </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="payouts">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow mono">When you get paid</p>
+      <h2>Your money, on a schedule you can <span class="b">plan around.</span></h2>
+      <p class="sub">Payments are held by Razorpay Curlec, a regulated Malaysian payment gateway, and released to your bank at each milestone. Payouts usually land in about two working days.</p>
+    </div>
+    <ol class="track">
+      <li><span class="mono">After the deposit</span><h3>Ingredient money</h3><p>Upload receipts and get exactly those amounts, up to what the host has paid so far.</p><b>Receipts</b></li>
+      <li><span class="mono">14 days before</span><h3>100% secured</h3><p>The host pays the balance and the headcount locks. Now you can start cooking.</p><b>Secured</b></li>
+      <li><span class="mono">Event day</span><h3>80% released</h3><p>Upload delivery photos. When the host taps <i>&ldquo;Makanan Diterima&rdquo;</i>, or at midnight, it&rsquo;s yours.</p><b>80%</b></li>
+      <li><span class="mono">48 hours after</span><h3>Final 20%</h3><p>Releases automatically if no dispute is raised. Nobody can hold it back.</p><b>100%</b></li>
+    </ol>
+
+    <div class="cancel">
+      <div>
+        <p class="eyebrow mono">If the host cancels</p>
+        <h3>You never lose what you&rsquo;ve already spent.</h3>
+        <p>You keep whichever is higher: the ingredient receipts you&rsquo;ve uploaded, or the cancellation fee.</p>
+      </div>
+      <table>
+        <thead><tr><th class="mono">Host cancels</th><th class="mono">You keep the higher of</th></tr></thead>
+        <tbody>
+          <tr><td>More than 30 days before</td><td>Your receipts, or <b>10%</b></td></tr>
+          <tr><td>14 to 30 days before</td><td>Your receipts, or <b>30%</b></td></tr>
+          <tr><td>Less than 14 days before</td><td>Your receipts, or <b>50%</b></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
