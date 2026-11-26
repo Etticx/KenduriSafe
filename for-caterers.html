@@ -80,6 +80,7 @@
   .eyebrow { color: var(--blue); margin-bottom: 20px; }
   .lede { max-width: 480px; margin-top: 32px; font-size: 16px; line-height: 1.55; color: var(--ink-2); }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  #art { display: block; width: 100%; aspect-ratio: 1; max-width: 440px; margin-left: auto; opacity: 0; animation: fade-up .8s ease-out .2s forwards; }
 
   h1 .line { display: block; overflow: hidden; padding-bottom: .2em; margin-bottom: -.2em; }
   h1 .line > span { display: inline-block; transform: translateY(110%); animation: rise .9s cubic-bezier(.2, .7, .2, 1) forwards; }
@@ -88,7 +89,7 @@
   .ctas { animation-delay: .45s; }
   @keyframes rise { to { transform: none; } }
   @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { h1 .line > span, .lede, .ctas { animation: none; transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { h1 .line > span, .lede, .ctas, #art { animation: none; transform: none; opacity: 1; } }
 
   .block { padding: 120px 0; border-top: 1px solid var(--line); }
   h2 { font-size: clamp(32px, 4.4vw, 60px); font-weight: 500; line-height: 1.04; letter-spacing: -.035em; max-width: 14em; }
@@ -103,6 +104,7 @@
 
   @media (max-width: 1000px) {
     .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    #art { max-width: 320px; margin: 0; }
   }
   @media (max-width: 760px) {
     .wrap { padding: 0 16px; }
@@ -150,6 +152,7 @@
           <a class="btn btn-ghost mono" href="#pricing">See pricing</a>
         </div>
       </div>
+      <canvas id="art" aria-hidden="true"></canvas>
     </div>
   </div>
 </header>
@@ -158,6 +161,57 @@
   <div class="wrap"><span>&copy; 2026 Amanah Kenduri Sdn Bhd</span><span>A UiTM ENT600 student project</span></div>
 </footer>
 
+<script>
+// dithered kawah (big wok) on a stand, same palette and ordered dither as the other pages
+(() => {
+  const cv = document.getElementById('art');
+  const PAL = ['#FEFEFD', '#EEF1F5', '#DDE3EA', '#C9D2DD', '#B3C0D2', '#8EA9DE', '#6B95EE', '#4A80F2', '#2F6BF0', '#1F5BE0', '#154ECD'];
+  const BAYER = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5].map(v => (v + .5) / 16);
+  const cell = 3;
+  const seg = (x, y, ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))); return Math.hypot(x - ax - t * dx, y - ay - t * dy); };
+  // darkness 0..1 at (x, y) in 0..1 units; -1 = empty. t (seconds) is for the steam.
+  function kawah(x, y, t) {
+    const rimY = .56;
+    if (Math.abs(x - .5) < .43 && Math.abs(y - rimY) < .018) return 1;                        // rim
+    if (y > rimY && ((x - .5) / .4) ** 2 + ((y - rimY) / .24) ** 2 <= 1)                      // bowl: lit top-left, deep blue bottom-right
+      return Math.min(1, .5 + .55 * (y - rimY) / .24 + .25 * (x - .3));
+    for (const hx of [.075, .925]) { const d = Math.hypot(x - hx, y - .6); if (d > .025 && d < .045) return .9; } // handles
+    if (y < rimY && ((x - .5) / .34) ** 2 + ((y - rimY) / .09) ** 2 <= 1) return .42 - .18 * (rimY - y) / .09; // heaped rice, lighter at the top
+    if (seg(x, y, .32, .78, .26, .93) < .014 || seg(x, y, .68, .78, .74, .93) < .014) return .8;  // stand legs
+    if (((x - .5) / .38) ** 2 + ((y - .94) / .025) ** 2 <= 1) return .12;                     // shadow
+    return steam(x, y, t);
+  }
+  // three wisps rising from the rice, wobbling and thinning as they go up
+  function steam(x, y, t) {
+    if (y > .47 || y < .06) return -1;
+    let v = -1;
+    for (let i = 0; i < 3; i++) {
+      const up = (.47 - y) / .41, x0 = .38 + i * .12 + .035 * Math.sin(y * 16 - t * 1.6 + i * 2.1) * (.4 + up);
+      const w = .022 * (1 - .4 * up);
+      if (Math.abs(x - x0) < w) v = Math.max(v, .32 * (1 - up) + .06);
+    }
+    return v;
+  }
+  function draw(t) {
+    const ctx = cv.getContext('2d'), dpr = window.devicePixelRatio || 1, s = cv.clientWidth;
+    if (!s) return;
+    if (cv.width !== Math.round(s * dpr)) { cv.width = cv.height = Math.round(s * dpr); }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.floor(s / cell), paths = PAL.map(() => new Path2D());
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+      const v = kawah((c + .5) / n, (r + .5) / n, t);
+      if (v < 0) continue;
+      const lvl = v * (PAL.length - 1), lo = Math.floor(lvl);
+      const k = Math.min(PAL.length - 1, lo + ((lvl - lo) > BAYER[(r & 3) * 4 + (c & 3)] ? 1 : 0));
+      if (k) paths[k].rect(c * cell, r * cell, cell - 1, cell - 1);
+    }
+    ctx.clearRect(0, 0, s, s);
+    paths.forEach((p, k) => { if (k) { ctx.fillStyle = PAL[k]; ctx.fill(p); } });
+  }
+  draw(0);
+  new ResizeObserver(() => draw(0)).observe(cv);
+})();
+</script>
 <script>
 // Caterers menu: opens on hover (short delay, so passing over it doesn't flash it), on click/tap and from the keyboard
 (() => {
