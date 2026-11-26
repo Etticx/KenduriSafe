@@ -143,6 +143,22 @@
   @media (max-width: 1000px) { .track { grid-template-columns: 1fr 1fr; row-gap: 40px; } .cancel { grid-template-columns: 1fr; gap: 32px; } }
   @media (max-width: 760px) { .track { grid-template-columns: 1fr; } .cancel { padding: 24px; } td + td { padding-left: 12px; } }
 
+  /* headcount planner demo: drag the guests, the shopping list rescales */
+  .plan-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; align-items: center; }
+  .planner { padding: 36px; background: #fff; border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(8, 8, 8, .06); }
+  .pax { display: flex; align-items: baseline; gap: 12px; color: var(--ink-2); }
+  .pax output { font-size: 64px; font-weight: 500; letter-spacing: -.04em; color: var(--blue); font-variant-numeric: tabular-nums; }
+  #pax { width: 100%; margin: 16px 0 24px; accent-color: var(--blue); }
+  #list { list-style: none; }
+  #list li { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
+  #list b { font: 500 15px "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+  /* dotted bar, same dots as the art; width set from the amount */
+  #list li::after { content: ""; grid-column: 1 / -1; height: 6px; background: radial-gradient(var(--blue) 1.2px, transparent 1.6px) 0 0 / 4px 4px;
+    -webkit-mask-image: linear-gradient(90deg, #000 var(--w, 0%), transparent 0); mask-image: linear-gradient(90deg, #000 var(--w, 0%), transparent 0); }
+  .note { margin-top: 16px; font-size: 11px; color: var(--ink-2); }
+  @media (max-width: 1000px) { .plan-grid { grid-template-columns: 1fr; gap: 40px; } }
+  @media (max-width: 760px) { .planner { padding: 24px; } .pax output { font-size: 48px; } }
+
   footer { padding: 28px 0; font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line); }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
@@ -288,6 +304,28 @@
   </div>
 </section>
 
+<section class="block" id="planner">
+  <div class="wrap plan-grid">
+    <div>
+      <p class="eyebrow mono">Headcount planner</p>
+      <h2>Guests change. Your shopping list <span class="b">keeps up.</span></h2>
+      <p class="sub">When the host updates their RSVP, you see straight away how much rice, chicken and everything else to buy. Set your own amounts per pax for each menu, and stop guessing at the market.</p>
+    </div>
+    <div class="planner">
+      <label class="pax" for="pax"><span class="mono">Guests</span><output id="pax-out" for="pax">300</output><span class="mono">pax</span></label>
+      <input id="pax" type="range" min="50" max="1000" step="10" value="300">
+      <ul id="list">
+        <li data-per=".12" data-unit="kg"><span>Beras (nasi minyak)</span><b></b></li>
+        <li data-per=".25" data-unit="kg"><span>Ayam (masak merah)</span><b></b></li>
+        <li data-per=".1" data-unit="kg"><span>Daging (rendang)</span><b></b></li>
+        <li data-per=".08" data-unit="kg"><span>Sayur (acar)</span><b></b></li>
+        <li data-per=".3" data-unit="L"><span>Air sirap</span><b></b></li>
+      </ul>
+      <p class="note mono">Example amounts per pax. You set your own.</p>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="wrap"><span>&copy; 2026 Amanah Kenduri Sdn Bhd</span><span>A UiTM ENT600 student project</span></div>
 </footer>
@@ -346,6 +384,24 @@
   let on = false, last = 0;
   const tick = now => { if (!on) return; if (now - last > 50) { last = now; draw(now / 1000); } requestAnimationFrame(tick); };
   new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on) requestAnimationFrame(tick); }).observe(cv);
+})();
+</script>
+<script>
+// headcount planner: amount = guests x the caterer's amount per pax; bars are relative to the biggest amount at 1,000 pax
+(() => {
+  const pax = document.getElementById('pax'), out = document.getElementById('pax-out'), rows = [...document.querySelectorAll('#list li')];
+  const top = Math.max(...rows.map(li => +li.dataset.per)) * +pax.max;
+  const update = () => {
+    const n = +pax.value;
+    out.value = n.toLocaleString('en-MY');
+    for (const li of rows) {
+      const amt = n * li.dataset.per;
+      li.querySelector('b').textContent = amt.toLocaleString('en-MY', { maximumFractionDigits: 1 }) + ' ' + li.dataset.unit;
+      li.style.setProperty('--w', amt / top * 100 + '%');
+    }
+  };
+  pax.addEventListener('input', update);
+  update();
 })();
 </script>
 <script>
