@@ -208,7 +208,16 @@
   .faq details p { max-width: 620px; padding-bottom: 24px; color: var(--ink-2); line-height: 1.6; }
   @media (max-width: 1000px) { .faq-grid { grid-template-columns: 1fr; gap: 40px; } }
 
-  footer { padding: 28px 0; font-size: 13px; color: var(--ink-2); border-top: 1px solid var(--line); }
+  /* closing call to action, same blue band as the About page */
+  .cta { padding: 96px 0; background: var(--blue); color: #fff; }
+  .cta .sub { color: rgba(255, 255, 255, .78); }
+  .cta .row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .cta .btn-primary { background: var(--ivory); color: var(--blue); border-color: var(--ivory); }
+  .cta .btn-primary:hover { background: #eef3fd; }
+  .cta .btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .5); }
+  .cta .btn-ghost:hover { background: rgba(255, 255, 255, .1); }
+
+  footer { padding: 28px 0; font-size: 13px; color: var(--ink-2); }
   footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 
   @media (max-width: 1000px) {
@@ -468,6 +477,17 @@
         <summary>Why do you check Semak Mule?</summary>
         <p>So hosts know your bank account isn&rsquo;t linked to scams. It&rsquo;s the reason a verified badge means something, and why hosts are willing to book a caterer they&rsquo;ve never met.</p>
       </details>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2>Cook with the money already <i>secured.</i></h2>
+    <p class="sub">Free to start. Verified once. Paid on time, every booking.</p>
+    <div class="row">
+      <a class="btn btn-primary mono" href="#join">List your business <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn btn-ghost mono" href="about.html">How KenduriSafe works</a>
     </div>
   </div>
 </section>
