@@ -163,6 +163,37 @@
   .foot-sum { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--ink-2); }
   .foot-sum b { font-size: 20px; color: var(--coal); font-weight: 600; letter-spacing: -.02em; }
 
+  /* agreement and payment */
+  .big-num { font-size: 18px; font-weight: 600; color: var(--blue); }
+  .menu-line { margin-top: 8px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+  .sched { list-style: none; counter-reset: s; border-left: 1px solid var(--line); }
+  .sched li { position: relative; display: grid; gap: 3px; padding: 0 0 16px 20px; font-size: 14px; }
+  .sched li::before { content: ""; position: absolute; left: -5px; top: 4px; width: 9px; height: 9px; background: var(--blue); }
+  .sched li span { color: var(--ink-2); font-size: 13px; line-height: 1.45; }
+  .cancel-t .row b { color: var(--blue); }
+  .agree { display: flex; gap: 12px; align-items: flex-start; margin-top: 24px; padding: 14px; font-size: 14px; line-height: 1.45; background: #fff; border: 1px solid var(--line); cursor: pointer; }
+  .agree input { width: 20px; height: 20px; margin-top: 1px; flex: none; accent-color: var(--blue); }
+  .agree.bad { border-color: #b3261e; }
+
+  .accepted { display: flex; gap: 8px; align-items: flex-start; margin-top: 16px; padding: 12px 14px; font-size: 13.5px; line-height: 1.45; color: var(--ok); background: #ecf7f0; border: 1px solid #bfe3cf; }
+  .accepted svg { flex: none; margin-top: 2px; }
+  .pay-sheet { margin-top: 16px; padding: 20px; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--coal); }
+  .pay-by { font-size: 10px; color: var(--ink-2); }
+  .pay-amt { margin-top: 10px; font-size: 40px; font-weight: 500; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+  .pay-what { font-size: 13px; }
+  .methods { margin-top: 20px; border: 0; }
+  .method { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; font-size: 15px; border: 1px solid var(--line); cursor: pointer; transition: border-color var(--t-fast), background var(--t-fast); }
+  .method + .method { margin-top: -1px; }
+  .method.on { position: relative; border-color: var(--blue); background: var(--soft); }
+  .method input { width: 18px; height: 18px; accent-color: var(--blue); }
+  .safe-note { display: flex; gap: 10px; margin-top: 16px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+  .safe-note svg { flex: none; color: var(--blue); margin-top: 2px; }
+
+  .paid { text-align: left; }
+  .paid-mark { display: grid; place-items: center; width: 64px; height: 64px; margin: 12px 0 4px; color: #fff; background: var(--blue); animation: pop .5s var(--ease) both; }
+  .paid .label { margin-top: 18px; }
+  .receipt { margin-top: 22px; }
+
   /* demo controls beside the phone */
   .demo { position: sticky; top: 32px; width: 280px; padding: 24px; background: #fff; border: 1px solid var(--line); }
   .demo-note, .demo-hint { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
