@@ -1,0 +1,13 @@
+/* Headcount planner (used on /for-caterers and inside the prototype): drag the guests, the shopping list rescales */
+.planner { padding: 36px; background: #fff; border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(8, 8, 8, .06); }
+.planner .pax { display: flex; align-items: baseline; gap: 12px; color: var(--ink-2); }
+.planner .pax output { font-size: 64px; font-weight: 500; letter-spacing: -.04em; color: var(--blue); font-variant-numeric: tabular-nums; }
+.planner #pax { width: 100%; margin: 16px 0 24px; accent-color: var(--blue); }
+.planner #list { list-style: none; }
+.planner #list li { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
+.planner #list b { font: 500 15px var(--font-mono), monospace; font-variant-numeric: tabular-nums; }
+/* dotted bar, same dots as the art; width set from the amount */
+.planner #list li::after { content: ""; grid-column: 1 / -1; height: 6px; background: radial-gradient(var(--blue) 1.2px, transparent 1.6px) 0 0 / 4px 4px;
+  -webkit-mask-image: linear-gradient(90deg, #000 var(--w, 0%), transparent 0); mask-image: linear-gradient(90deg, #000 var(--w, 0%), transparent 0); }
+.planner .note { margin-top: 16px; font-size: 11px; color: var(--ink-2); }
+@media (max-width: 760px) { .planner { padding: 24px; } .planner .pax output { font-size: 48px; } }

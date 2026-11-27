@@ -71,19 +71,7 @@
 
   /* headcount planner demo: drag the guests, the shopping list rescales */
   .plan-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; align-items: center; }
-  .planner { padding: 36px; background: #fff; border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(8, 8, 8, .06); }
-  .pax { display: flex; align-items: baseline; gap: 12px; color: var(--ink-2); }
-  .pax output { font-size: 64px; font-weight: 500; letter-spacing: -.04em; color: var(--blue); font-variant-numeric: tabular-nums; }
-  #pax { width: 100%; margin: 16px 0 24px; accent-color: var(--blue); }
-  #list { list-style: none; }
-  #list li { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
-  #list b { font: 500 15px var(--font-mono), monospace; font-variant-numeric: tabular-nums; }
-  /* dotted bar, same dots as the art; width set from the amount */
-  #list li::after { content: ""; grid-column: 1 / -1; height: 6px; background: radial-gradient(var(--blue) 1.2px, transparent 1.6px) 0 0 / 4px 4px;
-    -webkit-mask-image: linear-gradient(90deg, #000 var(--w, 0%), transparent 0); mask-image: linear-gradient(90deg, #000 var(--w, 0%), transparent 0); }
-  .note { margin-top: 16px; font-size: 11px; color: var(--ink-2); }
   @media (max-width: 1000px) { .plan-grid { grid-template-columns: 1fr; gap: 40px; } }
-  @media (max-width: 760px) { .planner { padding: 24px; } .pax output { font-size: 48px; } }
 
   /* how to join: five numbered steps */
   .join { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; list-style: none; counter-reset: j; }

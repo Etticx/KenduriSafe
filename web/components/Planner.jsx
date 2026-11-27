@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import './planner.css';
 
 // Example amounts per pax; a caterer would set their own per menu.
 const ITEMS = [
@@ -13,8 +14,8 @@ const MAX = 1000, TOP = Math.max(...ITEMS.map(i => i[1])) * MAX; // bars are rel
 const fmt = n => n.toLocaleString('en-MY', { maximumFractionDigits: 1 });
 
 // Headcount planner demo: drag the guests, the shopping list and its dotted bars rescale.
-export default function Planner() {
-  const [pax, setPax] = useState(300);
+export default function Planner({ initial = 300 }) {
+  const [pax, setPax] = useState(initial);
   return (
     <div className="planner">
       <label className="pax" htmlFor="pax"><span className="mono">Guests</span><output id="pax-out" htmlFor="pax">{fmt(pax)}</output><span className="mono">pax</span></label>
