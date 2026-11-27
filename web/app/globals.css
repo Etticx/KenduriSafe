@@ -1,2 +1,89 @@
-:root { --ivory: #FEFEFD; --coal: #080808; --blue: #154ECD; }
-body { background: var(--ivory); color: var(--coal); font-family: var(--font-inter), system-ui, sans-serif; }
+/* Shared by every page: tokens, nav + Caterers menu, buttons, section basics, footer, closing band.
+   Page-only styles live next to each page (home.css, about.css, caterers.css), scoped under .p-<page>. */
+:root {
+  --ivory: #FEFEFD;
+  --coal: #080808;
+  --blue: #154ECD;
+  --blue-soft: #7FA3EC;
+  --ink-2: #4a4a48;
+  --line: #e6e6e3;
+}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--ivory); color: var(--coal); font-family: var(--font-inter), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .mono { font-family: var(--font-mono), ui-monospace, monospace; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  i { font-style: italic; }
+
+  .wrap { position: relative; z-index: 1; width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 40px; }
+
+  nav { position: relative; display: flex; align-items: center; gap: 28px; padding: 20px 0; font-size: 14px; }
+  /* divider runs edge to edge even though the nav content stays in the centred column (the hero clips the overflow) */
+  nav::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 100vw; height: 1px; background: var(--line); transform: translateX(-50%); }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 16px; letter-spacing: -.01em; }
+  .links { margin-left: auto; display: flex; align-items: center; gap: 28px; color: var(--ink-2); }
+  .links a:hover, .links a[aria-current] { color: var(--coal); }
+  .links svg { vertical-align: middle; margin-left: 2px; }
+
+  /* Caterers mega menu: a light frosted panel (mostly solid ivory, gentle blur) under the nav */
+  .dd { display: flex; }
+  .dd-btn { display: inline-flex; align-items: center; gap: 2px; padding: 6px 0; font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  .dd-btn:hover, .dd.open .dd-btn { color: var(--coal); }
+  .dd-btn svg { transition: transform .2s; }
+  .dd.open .dd-btn svg { transform: rotate(180deg); }
+  .dd-panel { position: absolute; left: 0; right: 0; top: calc(100% + 1px); z-index: 30; padding: 28px; color: var(--coal);
+    background: rgba(254, 254, 253, .86); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+    border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(8, 8, 8, .1);
+    opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .18s, transform .18s, visibility 0s .18s; }
+  .dd.open .dd-panel { opacity: 1; visibility: visible; transform: none; transition: opacity .18s, transform .18s; }
+  .dd-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1.1fr; gap: 28px; }
+  .dd-h { margin-bottom: 10px; font-size: 11px; color: var(--blue); }
+  .dd-col ul { list-style: none; }
+  .dd-col a { display: flex; align-items: center; gap: 12px; margin: 0 -12px; padding: 9px 12px; transition: background .15s; }
+  .dd-col a:hover, .dd-col a:focus-visible { background: #eef3fd; }
+  .dd-col svg { flex: none; margin: 0; color: var(--ink-2); transition: color .15s; }
+  .dd-col a:hover svg, .dd-col a:focus-visible svg { color: var(--blue); }
+  .dd-col b { display: block; font-size: 14px; font-weight: 500; }
+  .dd-col small { display: block; margin-top: 2px; font-size: 12px; color: var(--ink-2); }
+  .dd-col i { margin-left: auto; font-style: normal; color: var(--blue); opacity: 0; transform: translateX(-6px); transition: opacity .15s, transform .15s; }
+  .dd-col a:hover i, .dd-col a:focus-visible i { opacity: 1; transform: none; }
+  .dd-feature { display: flex; flex-direction: column; gap: 4px; }
+  .dd-photo { aspect-ratio: 16 / 10; margin-bottom: 10px; overflow: hidden; background: #e8eef9; }
+  .dd-photo img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+  .dd-feature:hover img { transform: scale(1.04); }
+  .dd-feature .mono { font-size: 11px; color: var(--blue); }
+  .dd-feature b { font-size: 15px; font-weight: 600; }
+  .dd-feature small { font-size: 12px; color: var(--ink-2); }
+  .dd-feature .go { margin-top: 8px; font-size: 13px; color: var(--blue); }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 1px solid var(--blue); transition: background .2s, color .2s; }
+  .btn-sm { min-height: 36px; padding: 0 14px; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #0f3fae; }
+  .btn-ghost { color: var(--blue); background: var(--ivory); }
+  .btn-ghost:hover { background: #eef3fd; }
+
+  .eyebrow { color: var(--blue); margin-bottom: 20px; }
+  .chip { border: 1px solid var(--line); padding: 6px 10px; font-size: 13px; background: var(--ivory); }
+  .chip.ok { color: var(--blue); border-color: #c9d7f6; background: #eef3fd; }
+
+  /* headline lines rise out of their own masks, then the text fades up */
+  @keyframes rise { to { transform: none; } }
+  @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  /* closing call to action band */
+  .cta { padding: 96px 0; background: var(--blue); color: #fff; }
+  .cta .sub { color: rgba(255, 255, 255, .78); }
+  .cta .row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .cta .btn-primary { background: var(--ivory); color: var(--blue); border-color: var(--ivory); }
+  .cta .btn-primary:hover { background: #eef3fd; }
+  .cta .btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .5); }
+  .cta .btn-ghost:hover { background: rgba(255, 255, 255, .1); }
+
+  footer { padding: 28px 0; font-size: 13px; color: var(--ink-2); }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 0 16px; }
+    .links a:not(.btn), .dd { display: none; } /* phones: menu links (incl. Caterers) hidden, only Book now stays */
+  }
