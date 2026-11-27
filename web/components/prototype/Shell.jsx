@@ -25,15 +25,24 @@ export default function Shell() {
   }, []);
   useEffect(() => { if (loaded.current) try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} }, [s]);
 
-  // each new screen starts at the top, and its .rv blocks rise in as they scroll into view
+  // each new screen starts at the top, and its .rv blocks rise in once they reach the visible part of the screen
+  // (checked on scroll rather than with an observer, so blocks skipped past by a fast scroll still appear)
   useEffect(() => {
-    const box = scroller.current;
-    if (!box) return;
-    box.querySelector('.body')?.scrollTo(0, 0);
-    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15 });
-    box.querySelectorAll('.rv').forEach((el, i) => { el.style.setProperty('--d', `${Math.min(i, 6) * 60}ms`); io.observe(el); });
-    return () => io.disconnect();
-  }, [s.screen, s.params]);
+    const body = scroller.current?.querySelector('.body');
+    if (!body) return;
+    body.scrollTo(0, 0);
+    let i = 0;
+    const show = () => {
+      const bottom = body.getBoundingClientRect().bottom - 24;
+      body.querySelectorAll('.rv:not(.in)').forEach(el => {
+        if (el.getBoundingClientRect().top < bottom) { el.style.setProperty('--d', `${Math.min(i++, 6) * 60}ms`); el.classList.add('in'); }
+      });
+      i = 0;
+    };
+    show();
+    body.addEventListener('scroll', show, { passive: true });
+    return () => body.removeEventListener('scroll', show);
+  }, [s.screen, s.params, s.booking]);
 
   const Screen = SCREENS[s.screen] || SCREENS.welcome;
   const b = s.booking, paidUp = b && b.paid >= total(b);
