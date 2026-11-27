@@ -56,10 +56,29 @@ function burst(x, y, t) {
   return k < .22 ? (1 - p * .7) * (d > R * .8 ? 1 : .6) : -1;
 }
 
+// eKYC live face check: a dotted head inside camera corner brackets; turn = -1 left, 0 straight, 1 right.
+// A soft band of darker dots sweeps down the face like a scan line.
+function face(x, y, t, turn = 0) {
+  const cx = .5 + turn * .05, ex = turn * .09;
+  const r = Math.hypot((x - cx) / .25, (y - .5) / .33);
+  if (r > .93 && r <= 1) return .85;                                                         // head outline
+  if (r <= .93) {
+    for (const sx of [-.095, .095]) if (Math.hypot(x - (cx + sx + ex), y - .44) < .026) return .95; // eyes
+    if (segDist(x, y, cx + ex * 1.3, .47, cx + ex * 1.3 - .025 * (turn || 1), .56) < .01) return .7; // nose
+    if (y > .6 && Math.abs(Math.hypot(x - (cx + ex), y - .55) - .1) < .012) return .8;       // smile
+    const scan = t ? (t * .6) % 1.3 - .15 : -1;                                              // scan band position
+    return .06 + (Math.abs(y - (.17 + scan * .66)) < .03 ? .22 : 0);
+  }
+  const gx = Math.abs(x - .5), gy = Math.abs(y - .5);
+  if ((gx > .39 && gx < .405 && gy > .3 && gy < .44) || (gy > .425 && gy < .44 && gx > .25 && gx < .405)) return .6; // corner brackets
+  return -1;
+}
+
 // by name, all in canvas pixels (x, y, w, h) plus time t for anything animated
 export const ARTS = {
   shield: (x, y, w, h) => shield(x / w, y / h),
   phone,
   kawah: (x, y, w, h, t) => kawah(x / w, y / h, t),
   burst: (x, y, w, h, t) => burst(x / w, y / h, t),
+  face: (x, y, w, h, t, turn) => face(x / w, y / h, t, turn),
 };
