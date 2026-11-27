@@ -303,6 +303,14 @@
   .planner { padding: 20px; box-shadow: none; }
   .planner .pax output { font-size: 48px; }
 
+  /* admin checklist */
+  .adm-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 6px; font-size: 15px; }
+  .adm-h .mono { font-size: 10px; color: var(--ink-2); }
+  .hits { list-style: none; margin-top: 10px; border: 1px solid var(--line); }
+  .hits li { padding: 10px 12px; font-size: 13px; line-height: 1.45; animation: scr-in var(--t-mid) var(--ease) both; }
+  .hits li + li { border-top: 1px solid var(--line); animation-delay: .12s; }
+  .hits .mono { display: block; font-size: 10px; color: var(--blue); }
+
   /* demo controls beside the phone */
   .demo { position: sticky; top: 32px; width: 280px; padding: 24px; background: #fff; border: 1px solid var(--line); }
   .demo-note, .demo-hint { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
