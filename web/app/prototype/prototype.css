@@ -281,6 +281,28 @@
   .tick.fail { background: #b3261e; }
   .dots { font: 500 11px var(--font-mono), monospace; letter-spacing: 1px; animation: blink-caret 1.2s steps(1) infinite; }
 
+  /* caterer dashboard, receipts, delivery */
+  .link-btn.inline { min-height: 0; padding: 0; font-size: inherit; text-decoration: underline; }
+  .earn { display: grid; grid-template-columns: 1fr 1fr; margin-top: 18px; border: 1px solid var(--line); background: #fff; }
+  .earn > div { display: grid; gap: 6px; padding: 14px; }
+  .earn > div + div { border-left: 1px solid var(--line); }
+  .earn .mono { font-size: 9.5px; color: var(--ink-2); }
+  .earn b { font-size: 22px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .earn > div:first-child b { color: var(--blue); }
+  .cbook-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; padding-bottom: 10px; }
+  .cbook-head b { display: block; font-size: 16px; font-weight: 600; }
+  .cbook-head small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--ink-2); }
+  .cbook-head .chip { white-space: nowrap; font-size: 10px; }
+  .cbook-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .rcpt-shot { display: grid; place-items: center; align-content: center; gap: 4px; width: 100%; aspect-ratio: 2.2; margin-top: 18px; font: inherit; color: var(--blue); cursor: pointer;
+    background: radial-gradient(#d3def5 1px, transparent 1.5px) 0 0 / 5px 5px, #fff; border: 1px dashed var(--soft-line); }
+  .rcpt-shot b { font-size: 14px; font-weight: 500; color: var(--coal); }
+  .rcpt-shot small { font-size: 12px; color: var(--ink-2); }
+  .rcpt-shot.on { background: var(--soft); border: 1px solid var(--blue); }
+  .release { margin-top: 16px; }
+  .planner { padding: 20px; box-shadow: none; }
+  .planner .pax output { font-size: 48px; }
+
   /* demo controls beside the phone */
   .demo { position: sticky; top: 32px; width: 280px; padding: 24px; background: #fff; border: 1px solid var(--line); }
   .demo-note, .demo-hint { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
