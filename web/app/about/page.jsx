@@ -4,7 +4,7 @@ import DitherArt from '@/components/DitherArt';
 import ChatPhone from '@/components/ChatPhone';
 import './about.css';
 
-export const metadata = { title: 'About KenduriSafe — Protection for hosts, certainty for caterers' };
+export const metadata = { title: 'About SecureKenduri — Protection for hosts, certainty for caterers' };
 
 export default function Page() {
   return (
@@ -15,9 +15,9 @@ export default function Page() {
 
           <div className="hero-grid">
             <div>
-              <p className="eyebrow mono">About KenduriSafe</p>
+              <p className="eyebrow mono">About SecureKenduri</p>
               <h1 aria-label="Protection for the host, certainty for the caterer."><span className="line"><span>Protection for the host,</span></span><span className="line"><span><span className="b">certainty</span> <span className="s">for the caterer.</span></span></span></h1>
-              <p className="lede">KenduriSafe is a catering booking platform built for <i>kenduri</i>. Every booking comes with a written agreement, staged payments held by a regulated payment gateway, and a caterer whose identity has actually been checked.</p>
+              <p className="lede">SecureKenduri is a catering booking platform built for <i>kenduri</i>. Every booking comes with a written agreement, staged payments held by a regulated payment gateway, and a caterer whose identity has actually been checked.</p>
               <p className="pitch"><b>Like Shopee Guarantee, but built for <i>kenduri</i>.</b> Money is only released when each part of the job is done.</p>
             </div>
             <DitherArt id="art" art="shield" />
@@ -65,7 +65,7 @@ export default function Page() {
             <div className="side">
               <span className="chip ok mono">For hosts</span>
               <h3>Families and couples holding a <i>kenduri</i></h3>
-              <div className="cols mono"><span>The worry today</span><span>With KenduriSafe</span></div>
+              <div className="cols mono"><span>The worry today</span><span>With SecureKenduri</span></div>
               <ul>
                 <li><span>Big deposit sent over WhatsApp with no protection</span><span>Deposit is held by the payment gateway, not paid straight to the caterer</span></li>
                 <li><span>Caterer disappears or under-delivers</span><span>Most of the money only moves after you confirm the food arrived</span></li>
@@ -75,7 +75,7 @@ export default function Page() {
             <div className="side">
               <span className="chip ok mono">For caterers</span>
               <h3>Home-based and small catering businesses</h3>
-              <div className="cols mono"><span>The worry today</span><span>With KenduriSafe</span></div>
+              <div className="cols mono"><span>The worry today</span><span>With SecureKenduri</span></div>
               <ul>
                 <li><span>Hosts invite more guests than booked</span><span>Headcount locks 14 days before; extra guests are a top-up</span></li>
                 <li><span>Late cancellations and unpaid balances</span><span>100% is secured before you cook, with a clear cancellation fee</span></li>
@@ -95,7 +95,7 @@ export default function Page() {
             <p className="sub">An example RM10,000 booking. Before the event, the caterer only receives what their ingredient receipts show. The rest stays locked until the food arrives.</p>
             <div className="safe">
               <span className="mono">Curlec is the safe. We&rsquo;re the remote control.</span>
-              <p>KenduriSafe never holds your money. Payments sit with Razorpay Curlec, a regulated Malaysian payment gateway. We only tell it when each stage can be released.</p>
+              <p>SecureKenduri never holds your money. Payments sit with Razorpay Curlec, a regulated Malaysian payment gateway. We only tell it when each stage can be released.</p>
             </div>
           </div>
           <ol className="stages">
@@ -203,7 +203,7 @@ export default function Page() {
           </div>
           <div>
             <div className="sub" style={{ 'maxWidth': '620px', 'marginTop': '0' }}>
-              <p>We started KenduriSafe as a UiTM technology entrepreneurship project, after reading one too many stories of families cooking their own wedding food the night before.</p>
+              <p>We started SecureKenduri as a UiTM technology entrepreneurship project, after reading one too many stories of families cooking their own wedding food the night before.</p>
               <p>We didn&rsquo;t invent anything new. We put together tools Malaysians already trust (online booking, held payments, identity checks) and built them around how a <i>kenduri</i> actually works.</p>
             </div>
             <div className="facts" style={{ 'marginTop': '40px' }}>

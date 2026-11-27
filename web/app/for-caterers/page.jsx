@@ -4,7 +4,7 @@ import DitherArt from '@/components/DitherArt';
 import Planner from '@/components/Planner';
 import './caterers.css';
 
-export const metadata = { title: 'KenduriSafe for caterers — Get paid before you cook' };
+export const metadata = { title: 'SecureKenduri for caterers — Get paid before you cook' };
 
 export default function Page() {
   return (
@@ -17,7 +17,7 @@ export default function Page() {
             <div>
               <p className="eyebrow mono">For caterers</p>
               <h1 aria-label="Get paid in full before you start cooking."><span className="line"><span>Get paid in full</span></span><span className="line"><span><span className="b">before</span> <span className="s">you start cooking.</span></span></span></h1>
-              <p className="lede">KenduriSafe secures 100% of the booking before the event, releases your ingredient money against receipts, and gives honest caterers a verified badge hosts can trust.</p>
+              <p className="lede">SecureKenduri secures 100% of the booking before the event, releases your ingredient money against receipts, and gives honest caterers a verified badge hosts can trust.</p>
               <div className="ctas">
                 <a className="btn btn-primary mono" href="#join">List your business <span aria-hidden="true">&rarr;</span></a>
                 <a className="btn btn-ghost mono" href="#pricing">See pricing</a>
@@ -197,7 +197,7 @@ export default function Page() {
           <div className="faq">
             <details open>
               <summary>Is it legal for an app to hold my money?</summary>
-              <p>We don&rsquo;t hold it. Payments sit with Razorpay Curlec, a regulated Malaysian payment gateway, as the Financial Services Act 2013 requires. KenduriSafe only tells Curlec when each stage can be released to you.</p>
+              <p>We don&rsquo;t hold it. Payments sit with Razorpay Curlec, a regulated Malaysian payment gateway, as the Financial Services Act 2013 requires. SecureKenduri only tells Curlec when each stage can be released to you.</p>
             </details>
             <details>
               <summary>What if the host tries to scam me?</summary>
@@ -229,7 +229,7 @@ export default function Page() {
           <p className="sub">Free to start. Verified once. Paid on time, every booking.</p>
           <div className="row">
             <a className="btn btn-primary mono" href="#join">List your business <span aria-hidden="true">&rarr;</span></a>
-            <a className="btn btn-ghost mono" href="/about">How KenduriSafe works</a>
+            <a className="btn btn-ghost mono" href="/about">How SecureKenduri works</a>
           </div>
         </div>
       </section>

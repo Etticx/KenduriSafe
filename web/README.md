@@ -1,4 +1,4 @@
-# KenduriSafe — Next.js site
+# SecureKenduri — Next.js site
 
 The landing, About and For caterers pages, ported from the static HTML files in the repo root.
 They look and behave the same; the shared parts now live in one place.

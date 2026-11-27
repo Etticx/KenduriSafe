@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600'], variabl
 const mono = JetBrains_Mono({ subsets: ['latin'], weight: ['500'], variable: '--font-mono' });
 
 export const metadata = {
-  title: 'KenduriSafe — Book trusted kenduri caterers',
+  title: 'SecureKenduri — Book trusted kenduri caterers',
   description: 'Book verified kenduri caterers with protected, staged payments.',
 };
 

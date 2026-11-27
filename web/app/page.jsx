@@ -3,7 +3,7 @@ import HeroScene from '@/components/HeroScene';
 import Rotator from '@/components/Rotator';
 import './home.css';
 
-export const metadata = { title: 'KenduriSafe — Book trusted kenduri caterers' };
+export const metadata = { title: 'SecureKenduri — Book trusted kenduri caterers' };
 
 export default function Page() {
   return (
@@ -79,7 +79,7 @@ export default function Page() {
             <article className="step" style={{ '--i': '2', '--img': 'url(/assets/step-book.jpg)', '--pos': 'center 60%' }}>
               <div className="step-top"><span className="mono">03 / 03</span><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></div>
               <h3>Book and lock the date</h3>
-              <p>Pay your deposit through KenduriSafe and get the menu, pax and price confirmed in writing. No more verbal deals.</p>
+              <p>Pay your deposit through SecureKenduri and get the menu, pax and price confirmed in writing. No more verbal deals.</p>
               <div className="step-ui"><span className="chip ok">&#10003; Deposit paid</span><span className="chip ok">&#10003; Menu confirmed</span><span className="chip">Sat, 14 Mar &middot; 300 pax</span></div>
             </article>
           </div>
