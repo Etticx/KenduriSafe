@@ -48,7 +48,7 @@ export default function Nav({ current }) {
         <Link href="/#how">How it works</Link>
         <Link href="/for-caterers" aria-current={here('caterers')}>For caterers</Link>
         <Link href="/about" aria-current={here('about')}>About</Link>
-        <a className="btn btn-primary btn-sm mono" href="#">Book now <span aria-hidden="true">&rarr;</span></a>
+        <Link className="btn btn-primary btn-sm mono" href="/prototype">Book now <span aria-hidden="true">&rarr;</span></Link>
       </div>
     </nav>
   );
