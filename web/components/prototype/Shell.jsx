@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { reducer, START, total } from './reducer';
 import { Store, Icon } from './ui';
 import { PHASES } from './data';
@@ -16,14 +16,16 @@ const PERSONAS = {
 
 export default function Shell() {
   const [s, d] = useReducer(reducer, START);
-  const scroller = useRef(null), loaded = useRef(false);
+  const [ready, setReady] = useState(false);
+  const scroller = useRef(null);
 
-  // per-viewer convenience: keep the demo where it was after a refresh
+  // per-viewer convenience: keep the demo where it was after a refresh.
+  // Saving waits for `ready`, so the empty first render never overwrites the saved demo.
   useEffect(() => {
     try { const saved = JSON.parse(localStorage.getItem(KEY)); if (saved) d({ type: 'load', state: saved }); } catch {}
-    loaded.current = true;
+    setReady(true);
   }, []);
-  useEffect(() => { if (loaded.current) try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} }, [s]);
+  useEffect(() => { if (ready) try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} }, [s, ready]);
 
   // each new screen starts at the top, and its .rv blocks rise in once they reach the visible part of the screen
   // (checked on scroll rather than with an observer, so blocks skipped past by a fast scroll still appear)
@@ -40,8 +42,12 @@ export default function Shell() {
       i = 0;
     };
     show();
+    // re-check when layout settles: web fonts loading, the window resizing, the tab becoming visible
+    const raf = requestAnimationFrame(show), ro = new ResizeObserver(show);
+    ro.observe(body);
+    document.fonts?.ready.then(show);
     body.addEventListener('scroll', show, { passive: true });
-    return () => body.removeEventListener('scroll', show);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); body.removeEventListener('scroll', show); };
   }, [s.screen, s.params, s.booking]);
 
   const Screen = SCREENS[s.screen] || SCREENS.welcome;
