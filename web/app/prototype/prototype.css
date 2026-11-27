@@ -1,0 +1,146 @@
+/* Clickable app prototype: a 390x844 phone on desktop, full screen on a real phone. Same tokens as the site:
+   ivory, coal, royal blue, square corners, 1px lines, mono labels, dot art. Motion is transform/opacity only. */
+@keyframes scr-in { from { opacity: 0; transform: translateX(18px); } }
+@keyframes pop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: none; } }
+@keyframes blink-caret { 50% { opacity: 0; } }
+@keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+
+.p-proto {
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --t-fast: .15s;
+  --t-mid: .28s;
+  --t-slow: .7s;
+  --soft: #eef3fd;
+  --soft-line: #c9d7f6;
+  --ok: #0f7a4a;
+  --warn: #a5560a;
+  min-height: 100vh;
+  background: radial-gradient(#dbe5f8 1px, transparent 1.5px) 0 0 / 8px 8px, var(--ivory);
+
+  .stage { display: flex; justify-content: center; align-items: flex-start; gap: 48px; padding: 32px 24px; }
+
+  /* phone frame */
+  .phone { position: relative; flex: none; display: flex; flex-direction: column; width: 390px; height: min(844px, calc(100vh - 64px)); min-height: 640px;
+    overflow: hidden; background: var(--ivory); border: 10px solid var(--coal); border-radius: 46px; box-shadow: 0 30px 80px rgba(8, 8, 8, .18); }
+  .status { display: flex; justify-content: space-between; align-items: center; height: 40px; padding: 0 26px; font-size: 13px; font-weight: 600; flex: none; }
+  .status .mono { font-size: 10px; color: var(--ink-2); font-weight: 500; }
+  .batt { width: 24px; height: 11px; border: 1.5px solid var(--coal); border-radius: 3px; background: linear-gradient(90deg, var(--coal) 70%, transparent 0) 1px 1px / calc(100% - 2px) calc(100% - 2px) no-repeat; }
+  .scr { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; animation: scr-in var(--t-mid) var(--ease); }
+
+  .bar { display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 8px; border-bottom: 1px solid var(--line); flex: none; }
+  .bar-title { flex: 1; text-align: center; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  .icon-btn, .icon-gap { display: grid; place-items: center; width: 44px; height: 44px; flex: none; background: none; border: 0; color: var(--coal); cursor: pointer; }
+  .icon-btn:active { background: var(--soft); }
+  .body { flex: 1; overflow-y: auto; padding: 20px; overscroll-behavior: contain; }
+  .foot { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 14px 20px 22px; border-top: 1px solid var(--line); background: var(--ivory); }
+
+  /* type */
+  .t-title { font-size: 28px; font-weight: 500; line-height: 1.08; letter-spacing: -.035em; }
+  .t-title .b { color: var(--blue); }
+  .t-sub { margin-top: 10px; color: var(--ink-2); font-size: 15px; line-height: 1.5; }
+  .label { margin: 28px 0 10px; font-size: 11px; color: var(--blue); }
+  .muted { color: var(--ink-2); }
+
+  /* buttons: square like the site, pressed state scales without moving neighbours */
+  .btn { justify-content: center; cursor: pointer; font-family: var(--font-mono), monospace; transition: background var(--t-fast), transform var(--t-fast), opacity var(--t-fast); }
+  .btn:active:not(:disabled) { transform: scale(.98); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-block { width: 100%; min-height: 52px; }
+  .link-btn { min-height: 44px; background: none; border: 0; color: var(--blue); font: inherit; font-size: 14px; cursor: pointer; }
+
+  /* forms: 16px inputs (no iOS zoom), label always visible, hint/error under the field */
+  .field { display: block; margin-top: 16px; }
+  .field-label { display: block; margin-bottom: 6px; font-size: 11px; color: var(--ink-2); }
+  .field input, .field select, .field textarea { width: 100%; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: var(--coal); background: #fff; border: 1px solid var(--line); border-radius: 0; transition: border-color var(--t-fast); }
+  .field textarea { min-height: 96px; resize: vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--soft); }
+  .field-hint { display: block; margin-top: 6px; font-size: 13px; color: var(--ink-2); }
+  .field.bad input { border-color: #b3261e; }
+  .field.bad .field-hint { color: #b3261e; }
+
+  /* cards and rows */
+  .card { display: block; width: 100%; text-align: left; padding: 16px; background: #fff; border: 1px solid var(--line); font: inherit; color: inherit; }
+  button.card { cursor: pointer; transition: border-color var(--t-fast), transform var(--t-fast); }
+  button.card:hover { border-color: var(--soft-line); }
+  button.card:active { transform: scale(.99); }
+  .stack > * + * { margin-top: 10px; }
+  .row { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .row:first-child { border-top: 0; }
+  .row span { color: var(--ink-2); }
+  .row b { font-weight: 500; text-align: right; }
+  .chip { font-size: 12px; padding: 4px 8px; }
+  .ok-chip { color: var(--ok); border-color: #bfe3cf; background: #ecf7f0; }
+
+  /* money bar */
+  .mbar-track { position: relative; height: 10px; background: #eef1f5; overflow: hidden; }
+  .mbar-track span { position: absolute; inset: 0; transform-origin: left; transition: transform var(--t-slow) var(--ease); }
+  .mbar-held { background: var(--blue-soft); }
+  .mbar-paid { background: var(--blue); }
+  .mbar-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .mbar-legend dt { font-size: 9.5px; color: var(--ink-2); }
+  .mbar-legend dd { margin-top: 4px; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .sw { display: inline-block; width: 8px; height: 8px; margin-right: 5px; background: #dfe3ea; font-style: normal; }
+  .sw-paid { background: var(--blue); }
+  .sw-held { background: var(--blue-soft); }
+
+  /* step indicator */
+  .steps .mono { font-size: 11px; color: var(--blue); }
+  .steps-bar { display: flex; gap: 4px; margin-top: 8px; }
+  .steps-bar i { flex: 1; height: 3px; background: var(--line); transition: background var(--t-mid); }
+  .steps-bar i.on { background: var(--blue); }
+
+  /* ASCII progress for simulated waits */
+  .working { padding: 28px 0; text-align: center; }
+  .ascii { font-family: var(--font-mono), monospace; font-size: 13px; color: var(--blue); white-space: pre; }
+  .working .mono { margin-top: 10px; font-size: 11px; color: var(--ink-2); }
+
+  /* scroll reveal inside the phone */
+  .rv { opacity: 0; transform: translateY(14px); transition: opacity .5s var(--ease) var(--d, 0ms), transform .5s var(--ease) var(--d, 0ms); }
+  .rv.in { opacity: 1; transform: none; }
+
+  /* welcome: dotted shield, headline lines rise out of their masks like the site hero */
+  .welcome { display: flex; flex-direction: column; }
+  .welcome-art { display: block; width: 150px; aspect-ratio: 1; margin: 4px 0 8px -10px; }
+  .welcome-title .line { display: block; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
+  .welcome-title .line > span { display: inline-block; transform: translateY(110%); animation: rise .8s var(--ease) .1s forwards; }
+  .welcome-title .line + .line > span { animation-delay: .22s; }
+  .choice { display: flex; align-items: center; gap: 14px; min-height: 76px; }
+  .choice > svg:first-child { color: var(--blue); flex: none; }
+  .choice > svg:last-child { margin-left: auto; color: var(--ink-2); flex: none; transition: transform var(--t-fast); }
+  .choice:hover > svg:last-child { transform: translateX(3px); }
+  .choice b { display: block; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+  .choice small { display: block; margin-top: 3px; font-size: 13px; color: var(--ink-2); }
+
+  /* one-time code: one real input, drawn as 6 boxes with a blinking caret */
+  .otp { position: relative; display: block; margin-top: 24px; }
+  .otp input { position: absolute; inset: 22px 0 0; width: 100%; height: 60px; opacity: 0; font-size: 16px; }
+  .otp-boxes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; pointer-events: none; }
+  .otp-boxes i { display: grid; place-items: center; height: 60px; font: 500 24px var(--font-mono), monospace; font-style: normal; background: #fff; border: 1px solid var(--line); }
+  .otp:focus-within .otp-boxes i.cur { border-color: var(--blue); box-shadow: 0 0 0 3px var(--soft); }
+  .otp:focus-within .otp-boxes i.cur::after { content: ""; width: 2px; height: 26px; background: var(--blue); animation: blink-caret 1s steps(1) infinite; }
+
+  /* demo controls beside the phone */
+  .demo { position: sticky; top: 32px; width: 280px; padding: 24px; background: #fff; border: 1px solid var(--line); }
+  .demo-note, .demo-hint { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+  .demo-hint { margin-top: 8px; color: var(--warn); }
+  .demo section { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .demo-h { display: block; margin-bottom: 10px; font-size: 11px; color: var(--ink-2); }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); }
+  .seg button { min-height: 44px; font: inherit; font-size: 13px; background: #fff; border: 0; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button.on { background: var(--blue); color: #fff; }
+  .clock { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
+  .demo-btn { width: 100%; margin-top: 12px; }
+  .demo select { width: 100%; min-height: 44px; padding: 0 10px; font: inherit; font-size: 14px; border: 1px solid var(--line); background: #fff; }
+  .demo-reset { margin-top: 22px; min-height: 44px; padding: 0; background: none; border: 0; color: #b3261e; font-size: 11px; cursor: pointer; }
+
+  @media (max-width: 760px) {
+    .stage { flex-direction: column; align-items: stretch; gap: 0; padding: 0; }
+    .phone { width: 100%; height: 100dvh; min-height: 0; border: 0; border-radius: 0; box-shadow: none; }
+    .demo { position: static; width: auto; border-width: 1px 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scr, .rv, .mbar-track span { animation: none; transition: none; }
+    .rv { opacity: 1; transform: none; }
+  }
+}

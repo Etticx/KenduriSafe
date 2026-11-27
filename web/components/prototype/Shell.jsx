@@ -1,0 +1,87 @@
+'use client';
+import { useEffect, useReducer, useRef } from 'react';
+import { reducer, START, total } from './reducer';
+import { Store, Icon } from './ui';
+import { PHASES } from './data';
+import { SCREENS } from './screens';
+
+const KEY = 'securekenduri-prototype';
+
+// who each "View as" button signs in as
+const PERSONAS = {
+  host: { user: { role: 'host', name: 'Nur Aisyah', phone: '012-345 6789' }, screen: s => (s.booking ? 'tracker' : 'search') },
+  caterer: { user: { role: 'caterer', name: 'Dapur Mak Long', phone: '013-222 1010', catererId: 'mak-long' }, screen: () => 'cdash' },
+  admin: { user: { role: 'admin', name: 'Admin' }, screen: () => 'admin' },
+};
+
+export default function Shell() {
+  const [s, d] = useReducer(reducer, START);
+  const scroller = useRef(null), loaded = useRef(false);
+
+  // per-viewer convenience: keep the demo where it was after a refresh
+  useEffect(() => {
+    try { const saved = JSON.parse(localStorage.getItem(KEY)); if (saved) d({ type: 'load', state: saved }); } catch {}
+    loaded.current = true;
+  }, []);
+  useEffect(() => { if (loaded.current) try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {} }, [s]);
+
+  // each new screen starts at the top, and its .rv blocks rise in as they scroll into view
+  useEffect(() => {
+    const box = scroller.current;
+    if (!box) return;
+    box.querySelector('.body')?.scrollTo(0, 0);
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15 });
+    box.querySelectorAll('.rv').forEach((el, i) => { el.style.setProperty('--d', `${Math.min(i, 6) * 60}ms`); io.observe(el); });
+    return () => io.disconnect();
+  }, [s.screen, s.params]);
+
+  const Screen = SCREENS[s.screen] || SCREENS.welcome;
+  const b = s.booking, paidUp = b && b.paid >= total(b);
+  const nextSkip = ['Skip to 14 days before', 'Skip to event day', 'Skip 48 hours'][s.phase];
+  const blocked = !b || b.status === 'agreed' ? 'Book and pay a deposit first.'
+    : s.phase === 1 && !paidUp ? 'Pay the balance first. Unpaid bookings auto-cancel 14 days before.' : '';
+  const viewAs = role => d({ type: 'login', user: PERSONAS[role].user, screen: PERSONAS[role].screen(s) });
+
+  return (
+    <Store.Provider value={[s, d]}>
+      <div className="stage">
+        <div className="phone" ref={scroller}>
+          <div className="status" aria-hidden="true"><span>9:41</span><span className="mono">SecureKenduri</span><span className="batt" /></div>
+          <div className="scr" key={s.screen + JSON.stringify(s.params)}><Screen /></div>
+        </div>
+
+        <aside className="demo" aria-label="Demo controls">
+          <p className="eyebrow mono">Prototype controls</p>
+          <p className="demo-note">Clickable prototype. No real accounts, codes or payments: any phone number and any 6-digit code work.</p>
+
+          <section>
+            <p className="mono demo-h">View as</p>
+            <div className="seg">
+              {['host', 'caterer', 'admin'].map(r => (
+                <button key={r} className={s.user?.role === r && (r !== 'caterer' || s.user.catererId) ? 'on' : ''} onClick={() => viewAs(r)}>
+                  {r === 'host' ? 'Host' : r === 'caterer' ? 'Caterer' : 'Admin'}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <p className="mono demo-h">Demo clock</p>
+            <p className="clock"><Icon name="clock" size={16} /> {PHASES[s.phase]}</p>
+            {nextSkip && <button className="btn btn-ghost mono demo-btn" disabled={!!blocked} onClick={() => d({ type: 'skip' })}>{nextSkip} <span aria-hidden="true">&rarr;</span></button>}
+            {nextSkip && blocked && <p className="demo-hint">{blocked}</p>}
+          </section>
+
+          <section>
+            <label className="mono demo-h" htmlFor="jump">Jump to screen</label>
+            <select id="jump" value={s.screen} onChange={e => d({ type: 'jump', screen: e.target.value })}>
+              {Object.entries(SCREENS).map(([id, C]) => <option key={id} value={id}>{C.title || id}</option>)}
+            </select>
+          </section>
+
+          <button className="demo-reset mono" onClick={() => { try { localStorage.removeItem(KEY); } catch {} d({ type: 'reset' }); }}>Reset demo</button>
+        </aside>
+      </div>
+    </Store.Provider>
+  );
+}
