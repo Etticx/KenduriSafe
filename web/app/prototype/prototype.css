@@ -238,6 +238,22 @@
   .ok-line { display: flex; gap: 6px; align-items: center; color: var(--ok) !important; }
   .diterima { font-size: 14px; }
 
+  /* "Makanan Diterima" celebration: dotted burst over a frosted ivory layer, tap anywhere to close */
+  .party { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 24px; text-align: center;
+    color: var(--coal); background: rgba(254, 254, 253, .9); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border: 0; font: inherit; cursor: pointer; animation: scr-in var(--t-mid) var(--ease); }
+  .party-art { width: 240px; aspect-ratio: 1; margin-bottom: -20px; }
+  .party .t-sub { margin-top: 4px; }
+
+  /* review and dispute */
+  .rate { display: flex; gap: 4px; }
+  .rate button { width: 44px; height: 44px; font-size: 24px; color: var(--line); background: none; border: 0; cursor: pointer; transition: color var(--t-fast), transform var(--t-fast); }
+  .rate button.on { color: var(--blue); }
+  .rate button:active { transform: scale(.9); }
+  .evid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .evid-tile, .evid-add { display: grid; place-items: center; aspect-ratio: 1; font-size: 9px; }
+  .evid-tile { color: var(--ink-2); background: radial-gradient(#b9ccf3 1px, transparent 1.5px) 0 0 / 5px 5px, #e8eef9; animation: pop .35s var(--ease) both; }
+  .evid-add { gap: 2px; align-content: center; color: var(--blue); background: #fff; border: 1px dashed var(--soft-line); font: inherit; font-size: 11px; cursor: pointer; }
+
   /* demo controls beside the phone */
   .demo { position: sticky; top: 32px; width: 280px; padding: 24px; background: #fff; border: 1px solid var(--line); }
   .demo-note, .demo-hint { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
