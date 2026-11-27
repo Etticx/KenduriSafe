@@ -60,15 +60,17 @@ function burst(x, y, t) {
 // A soft band of darker dots sweeps down the face like a scan line.
 function face(x, y, t, turn = 0) {
   const cx = .5 + turn * .05, ex = turn * .09;
-  const r = Math.hypot((x - cx) / .25, (y - .5) / .33);
-  if (r > .93 && r <= 1) return .85;                                                         // head outline
-  if (r <= .93) {
-    for (const sx of [-.095, .095]) if (Math.hypot(x - (cx + sx + ex), y - .44) < .026) return .95; // eyes
-    if (segDist(x, y, cx + ex * 1.3, .47, cx + ex * 1.3 - .025 * (turn || 1), .56) < .01) return .7; // nose
-    if (y > .6 && Math.abs(Math.hypot(x - (cx + ex), y - .55) - .1) < .012) return .8;       // smile
-    const scan = t ? (t * .6) % 1.3 - .15 : -1;                                              // scan band position
-    return .06 + (Math.abs(y - (.17 + scan * .66)) < .03 ? .22 : 0);
+  const scan = t ? (t * .6) % 1.3 - .15 : -1, band = Math.abs(y - (.12 + scan * .8)) < .03 ? .22 : 0; // scan line sweeping down
+  const r = Math.hypot((x - cx) / .21, (y - .42) / .28);
+  if (r > .92 && r <= 1) return .85;                                                         // head outline
+  if (r <= .92) {
+    for (const sx of [-.075, .075]) if (Math.abs(x - (cx + sx + ex)) < .03 && Math.abs(y - .4) < .008) return .9; // eyes as short strokes
+    if (segDist(x, y, cx + ex * 1.3, .43, cx + ex * 1.3, .5) < .008) return .6;              // nose
+    if (Math.abs(x - (cx + ex)) < .045 && Math.abs(y - .56) < .007) return .7;               // neutral mouth
+    return .06 + band;
   }
+  const sh = Math.hypot((x - .5) / .36, (y - 1.02) / .3);                                    // shoulders, cut off by the frame
+  if (y > .72 && y < .9 && sh <= 1) return sh > .93 ? .85 : .06 + band;
   const gx = Math.abs(x - .5), gy = Math.abs(y - .5);
   if ((gx > .39 && gx < .405 && gy > .3 && gy < .44) || (gy > .425 && gy < .44 && gx > .25 && gx < .405)) return .6; // corner brackets
   return -1;
