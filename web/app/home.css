@@ -1,0 +1,110 @@
+/* kendurisafe.html styles, scoped to this page (CSS nesting) so they never leak into the other pages */
+@keyframes drop-in { from { transform: translateY(-115%); opacity: 0; } }
+@keyframes drop-out { to { transform: translateY(115%); opacity: 0; } }
+@keyframes scroll { to { transform: translateX(-50%); } }
+.p-home {
+  .hero { position: relative; min-height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+
+  h1 { font-size: clamp(40px, 7vw, 108px); font-weight: 500; line-height: 1; letter-spacing: -.045em; margin-top: 56px; max-width: 11em; }
+  h1 .b { color: var(--blue); }
+  h1 .s { color: var(--blue-soft); }
+  .lede { max-width: 400px; margin-top: 32px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+  /* dithered kenduri scene (fireworks, feast table, one ketupat), drawn on canvas */
+  #mtn { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 68%; z-index: 0; display: block; }
+  /* one canvas per ridge, moved separately on scroll for parallax */
+  #mtn canvas { position: absolute; inset: 0; width: 100%; height: 100%; will-change: transform; }
+  #ket { position: absolute; z-index: 0; pointer-events: none; }
+
+  /* line-by-line reveal: each headline line rises out of its own mask, then the text and buttons fade up */
+  h1 .line { display: block; overflow: hidden; padding-bottom: .2em; margin-bottom: -.2em; }
+  h1 .line > span { display: inline-block; transform: translateY(110%); animation: rise .9s cubic-bezier(.2, .7, .2, 1) forwards; }
+  h1 .line + .line > span { animation-delay: .12s; }
+  .lede, .ctas { opacity: 0; animation: fade-up .8s ease-out .35s forwards; }
+  .ctas { animation-delay: .45s; }
+
+  /* rotating word: old word drops out below, the next drops in from above, the gap eases to the new width.
+     clip-path (not overflow) does the masking so the word stays on the sentence's baseline */
+  .rot { position: relative; display: inline-block; white-space: nowrap; padding: .1em 0 .25em; margin: -.1em 0 -.25em; clip-path: inset(0); transition: width .5s cubic-bezier(.65, 0, .35, 1); }
+  .rot > span { display: inline-block; }
+  .rot > .in { position: absolute; left: 0; top: .1em; animation: drop-in .55s cubic-bezier(.2, .7, .2, 1) .18s both; } /* starts once the old word is mostly gone */
+  .rot > .out { animation: drop-out .3s cubic-bezier(.5, 0, .75, 0) both; }
+  @media (prefers-reduced-motion: reduce) { h1 .line > span, .lede, .ctas { animation: none; transform: none; opacity: 1; } }
+
+  /* caterer marquee, same build as index.html, light theme */
+  .logos { padding: 40px 0 48px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 17px; }
+  .logos-cap { text-align: center; font-size: 14px; color: var(--ink-2); margin-bottom: 28px; }
+  .marquee { pointer-events: none; user-select: none; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .track { display: flex; width: max-content; animation: scroll 30s linear infinite; }
+  .set { display: flex; align-items: center; gap: 80px; padding-right: 80px; white-space: nowrap; }
+  .set .serif { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 19px; }
+  .set .caps { letter-spacing: .2em; font-weight: 600; font-size: 14px; }
+  .set .bold { font-weight: 600; }
+  .set .mono { font-size: 13px; }
+  /* two identical sets, so moving -50% loops seamlessly */
+  @media (prefers-reduced-motion: reduce) { .track { animation: none; } }
+
+  /* ---------- sections below the hero ---------- */
+  .block { padding: 120px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(32px, 4.4vw, 60px); font-weight: 500; line-height: 1.04; letter-spacing: -.035em; }
+  h2 .b { color: var(--blue); }
+  .sub { margin-top: 20px; max-width: 420px; color: var(--ink-2); line-height: 1.55; }
+
+  /* how it works: heading pinned on the left, step cards stack on the right as you scroll */
+  .how-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 64px; }
+  .pin { position: sticky; top: 120px; }
+  .step { position: sticky; top: calc(120px + var(--i) * 22px); display: flex; flex-direction: column; min-height: 340px; margin-bottom: 140px; padding: 36px; background: #fff; border: 1px solid var(--line); box-shadow: 0 -10px 30px rgba(8, 8, 8, .05); }
+  .step:last-child { margin-bottom: 0; }
+  .step-top { display: flex; justify-content: space-between; align-items: center; color: var(--blue); }
+  .step h3 { margin-top: auto; padding-top: 48px; font-size: 28px; font-weight: 500; letter-spacing: -.02em; }
+  .step p { margin-top: 12px; max-width: 460px; color: var(--ink-2); line-height: 1.55; }
+  .step-ui { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  /* photo backgrounds: dark gradient keeps the white text readable over any photo */
+  .step { color: #fff; border: 0; background: linear-gradient(to top, rgba(8, 8, 8, .88), rgba(8, 8, 8, .6) 55%, rgba(8, 8, 8, .3)), var(--img) var(--pos, center) / cover; }
+  .step-top { color: #fff; }
+  .step p { color: rgba(255, 255, 255, .82); }
+  .step .chip { color: #fff; background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); backdrop-filter: blur(6px); }
+  .step .chip.ok { background: rgba(21, 78, 205, .9); border-color: transparent; }
+
+  /* featured caterers */
+  .feat-head { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 24px; margin-bottom: 48px; }
+  .link { color: var(--blue); }
+  .link:hover { text-decoration: underline; }
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .card { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); transition: transform .25s, box-shadow .25s; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(8, 8, 8, .08); }
+  /* dotted blue tile shows until the photo loads (or if it is missing) */
+  .card-photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: radial-gradient(#b9ccf3 1px, transparent 1.5px) 0 0 / 6px 6px, #e8eef9; }
+  .card-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .badges { position: absolute; left: 12px; top: 12px; display: flex; gap: 6px; }
+  .badge { padding: 4px 8px; font-size: 11px; background: rgba(254, 254, 253, .94); }
+  .badge.grade { background: var(--blue); color: #fff; }
+  .card-body { display: flex; flex-direction: column; gap: 6px; flex: 1; padding: 20px; }
+  .card h3 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+  .meta { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+  .card-foot { display: flex; justify-content: space-between; align-items: baseline; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); }
+  .price b { font-size: 20px; font-weight: 600; }
+  .price small, .rating { font-size: 13px; color: var(--ink-2); }
+
+  @media (max-width: 1000px) {
+    .how-grid { grid-template-columns: 1fr; gap: 40px; }
+    .pin { position: static; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 0 16px; }
+    .links a:not(.btn), .dd { display: none; } /* phones: menu links (incl. Caterers) hidden, only Book now stays */
+    h1 { margin-top: 40px; }
+    /* phones: fixed-height range that always starts below the (taller) text, never behind the buttons */
+    .hero { padding-bottom: 320px; }
+    #mtn { height: 340px; }
+    .set { gap: 56px; padding-right: 56px; }
+    .block { padding: 80px 0; }
+    .step { min-height: 300px; padding: 24px; margin-bottom: 80px; top: calc(80px + var(--i) * 16px); }
+    .step h3 { font-size: 24px; }
+    .cards { grid-template-columns: 1fr; }
+  }
+}
