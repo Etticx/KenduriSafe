@@ -47,9 +47,19 @@ function steam(x, y, t) {
   return v;
 }
 
+// "Makanan Diterima" celebration: a dotted firework that opens, hollows out and fades every 1.8s
+// (t = 0, the reduced-motion still frame, shows it half open)
+function burst(x, y, t) {
+  const p = t ? (t / 1.8) % 1 : .45, dx = x - .5, dy = y - .5, d = Math.hypot(dx, dy), R = .46 * (1 - (1 - p) ** 3);
+  if (d > R || d < R * Math.max(.1, p * .8)) return -1;
+  const k = ((Math.atan2(dy, dx) / (2 * Math.PI) * 18) % 1 + 1) % 1;
+  return k < .22 ? (1 - p * .7) * (d > R * .8 ? 1 : .6) : -1;
+}
+
 // by name, all in canvas pixels (x, y, w, h) plus time t for anything animated
 export const ARTS = {
   shield: (x, y, w, h) => shield(x / w, y / h),
   phone,
   kawah: (x, y, w, h, t) => kawah(x / w, y / h, t),
+  burst: (x, y, w, h, t) => burst(x / w, y / h, t),
 };
