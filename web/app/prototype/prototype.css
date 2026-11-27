@@ -194,6 +194,50 @@
   .paid .label { margin-top: 18px; }
   .receipt { margin-top: 22px; }
 
+  /* booking tracker */
+  .trk-head { margin-bottom: 16px; }
+  .trk-head .t-title { margin-top: 10px; }
+  .st-agreed { color: var(--warn); border-color: #f0d2b3; background: #fdf4ea; }
+  .st-active, .st-received { color: var(--blue); border-color: var(--soft-line); background: var(--soft); }
+  .st-complete { color: var(--ok); border-color: #bfe3cf; background: #ecf7f0; }
+  .st-dispute { color: #b3261e; border-color: #f1c4c0; background: #fdf1f0; }
+  .notice { display: flex; gap: 10px; margin-top: 12px; padding: 14px; font-size: 13.5px; line-height: 1.5; border: 1px solid; }
+  .notice svg { flex: none; margin-top: 1px; }
+  .notice.warn { color: #7a1c16; border-color: #f1c4c0; background: #fdf1f0; }
+  .pax-card { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
+  .pax-card b { font-size: 22px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .pax-card small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--ink-2); }
+  .stepper { display: flex; border: 1px solid var(--line); flex: none; }
+  .stepper button { display: grid; place-items: center; width: 44px; height: 44px; background: #fff; border: 0; cursor: pointer; }
+  .stepper button + button { border-left: 1px solid var(--line); }
+  .stepper button:active { background: var(--soft); }
+
+  /* milestone timeline: square markers on a rail, filled when done, ringed when it's the current step */
+  .tl { list-style: none; margin-top: 24px; border-left: 1px solid var(--line); }
+  .tl > li { position: relative; padding: 0 0 26px 22px; }
+  .tl > li:last-child { padding-bottom: 4px; }
+  .tl > li::before { content: ""; position: absolute; left: -6px; top: 3px; width: 11px; height: 11px; background: var(--ivory); border: 2px solid var(--line); transition: background var(--t-mid), border-color var(--t-mid); }
+  .tl > li.done::before { background: var(--blue); border-color: var(--blue); }
+  .tl > li.now::before { border-color: var(--blue); box-shadow: 0 0 0 4px var(--soft); }
+  .tl-when { font-size: 10px; color: var(--blue); }
+  .tl h3 { margin-top: 4px; font-size: 17px; font-weight: 500; letter-spacing: -.015em; }
+  .tl li > p:not(.tl-when) { margin-top: 6px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+  .tl .btn { margin-top: 12px; }
+  .tl > li:not(.done):not(.now) h3 { color: var(--ink-2); }
+  .rcpts { list-style: none; margin-top: 10px; border: 1px solid var(--line); background: #fff; }
+  .rcpts li { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; align-items: center; padding: 10px 12px; font-size: 14px; }
+  .rcpts li + li { border-top: 1px solid var(--line); }
+  .rcpts svg { color: var(--blue); }
+  .rcpts small { grid-column: 2 / -1; font-size: 11.5px; color: var(--ok); }
+  .pending { color: var(--warn) !important; }
+  .dphotos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+  .dphotos figure { position: relative; margin: 0; aspect-ratio: 1; overflow: hidden; background: #e8eef9; }
+  .dphotos img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dphotos figcaption { position: absolute; left: 0; bottom: 0; padding: 2px 5px; font-size: 9px; color: #fff; background: rgba(8, 8, 8, .7); }
+  .demo-tip { display: block; margin-top: 4px; color: var(--blue); }
+  .ok-line { display: flex; gap: 6px; align-items: center; color: var(--ok) !important; }
+  .diterima { font-size: 14px; }
+
   /* demo controls beside the phone */
   .demo { position: sticky; top: 32px; width: 280px; padding: 24px; background: #fff; border: 1px solid var(--line); }
   .demo-note, .demo-hint { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
