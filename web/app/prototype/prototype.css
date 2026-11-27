@@ -254,6 +254,33 @@
   .evid-tile { color: var(--ink-2); background: radial-gradient(#b9ccf3 1px, transparent 1.5px) 0 0 / 5px 5px, #e8eef9; animation: pop .35s var(--ease) both; }
   .evid-add { gap: 2px; align-content: center; color: var(--blue); background: #fff; border: 1px dashed var(--soft-line); font: inherit; font-size: 11px; cursor: pointer; }
 
+  /* caterer verification */
+  .ic-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+  .ic { display: grid; place-items: center; align-content: center; gap: 4px; aspect-ratio: 1.58; padding: 8px; font: inherit; color: var(--blue); cursor: pointer;
+    background: radial-gradient(#d3def5 1px, transparent 1.5px) 0 0 / 5px 5px, #fff; border: 1px dashed var(--soft-line); transition: border-color var(--t-fast), background var(--t-fast); }
+  .ic b { font-size: 14px; color: var(--coal); font-weight: 500; text-transform: capitalize; }
+  .ic small { font-size: 12px; color: var(--ink-2); }
+  .ic.on { background: var(--soft); border: 1px solid var(--blue); }
+  .ic .working { padding: 0; }
+  .ic .ascii { font-size: 9px; }
+  .facecam { position: relative; overflow: hidden; background: #fff; border: 1px solid var(--line); }
+  .face-art { display: block; width: 100%; aspect-ratio: 1.15; }
+  .facecam.done { border-color: var(--ok); }
+  .face-prompt { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 8px 14px; font-size: 14px; text-align: center; border-top: 1px solid var(--line); }
+  .face-prompt .mono { font-size: 18px; color: var(--blue); }
+  .facecam.done .face-prompt { color: var(--ok); }
+  .face-prompt .working { padding: 4px 0; }
+  .seg-in { display: grid; grid-template-columns: 1fr 1fr; margin-top: 20px; border: 1px solid var(--line); }
+  .seg-in button { min-height: 48px; font: inherit; font-size: 14px; background: #fff; border: 0; cursor: pointer; }
+  .seg-in button + button { border-left: 1px solid var(--line); }
+  .seg-in button.on { background: var(--blue); color: #fff; }
+  .match { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 10px 12px; font-size: 13.5px; border: 1px solid; animation: scr-in var(--t-mid) var(--ease); }
+  .match.ok { color: var(--ok); border-color: #bfe3cf; background: #ecf7f0; }
+  .match.no { color: #b3261e; border-color: #f1c4c0; background: #fdf1f0; }
+  .tick.wait { background: #fff; border: 1px solid var(--soft-line); color: var(--blue); }
+  .tick.fail { background: #b3261e; }
+  .dots { font: 500 11px var(--font-mono), monospace; letter-spacing: 1px; animation: blink-caret 1.2s steps(1) infinite; }
+
   /* demo controls beside the phone */
   .demo { position: sticky; top: 32px; width: 280px; padding: 24px; background: #fff; border: 1px solid var(--line); }
   .demo-note, .demo-hint { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
